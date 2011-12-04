@@ -1,0 +1,10 @@
+*.DS_Store
+old/*
+
+# Netbeans projects files
+nbproject
+.settings
+.buildpath
+.project
+
+phperrors.log
