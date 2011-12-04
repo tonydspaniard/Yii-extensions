@@ -1,0 +1,335 @@
+<?php
+/**
+ * Modified version of Zend_Http_Cookie of Zend for easy integration
+ * with Yii as extension.
+ *
+ * Copyright (c) 2005-2010, Zend Technologies USA, Inc.
+ * All rights reserved.
+
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ * 
+ *     * Neither the name of Zend Technologies USA, Inc. nor the names of its
+ *       contributors may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/**
+ * EHttpCookie is a class describing an HTTP cookie and all it's parameters.
+ *
+ * EHttpCookie is a class describing an HTTP cookie and all it's parameters. The
+ * class also enables validating whether the cookie should be sent to the server in
+ * a specified scenario according to the request URI, the expiry time and whether
+ * session cookies should be used or not. Generally speaking cookies should be
+ * contained in a Cookiejar object, or instantiated manually and added to an HTTP
+ * request.
+ *
+ * See http://wp.netscape.com/newsref/std/cookie_spec.html for some specs.
+ *
+ * @category    Yii
+ * @package     EHttpClient
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com/)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ */
+class EHttpCookie
+{
+    /**
+     * EHttpCookie name
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * EHttpCookie value
+     *
+     * @var string
+     */
+    protected $value;
+
+    /**
+     * EHttpCookie expiry date
+     *
+     * @var int
+     */
+    protected $expires;
+
+    /**
+     * EHttpCookie domain
+     *
+     * @var string
+     */
+    protected $domain;
+
+    /**
+     * EHttpCookie path
+     *
+     * @var string
+     */
+    protected $path;
+
+    /**
+     * Whether the cookie is secure or not
+     *
+     * @var boolean
+     */
+    protected $secure;
+
+    /**
+     * EHttpCookie object constructor
+     *
+     * @todo Add validation of each one of the parameters (legal domain, etc.)
+     *
+     * @param string $name
+     * @param string $value
+     * @param int $expires
+     * @param string $domain
+     * @param string $path
+     * @param bool $secure
+     */
+    public function __construct($name, $value, $domain, $expires = null, $path = null, $secure = false)
+    {
+        if (preg_match("/[=,; \t\r\n\013\014]/", $name)) {
+       
+            throw new CException("Cookie name cannot contain these characters: =,; \\t\\r\\n\\013\\014 ({$name})");
+        }
+
+        if (! $this->name = (string) $name) {
+            throw new CException('Cookies must have a name');
+        }
+
+        if (! $this->domain = (string) $domain) {
+            throw new CException('Cookies must have a domain');
+        }
+
+        $this->value = (string) $value;
+        $this->expires = ($expires === null ? null : (int) $expires);
+        $this->path = ($path ? $path : '/');
+        $this->secure = $secure;
+    }
+
+    /**
+     * Get EHttpCookie name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get cookie value
+     *
+     * @return string
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * Get cookie domain
+     *
+     * @return string
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * Get the cookie path
+     *
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * Get the expiry time of the cookie, or null if no expiry time is set
+     *
+     * @return int|null
+     */
+    public function getExpiryTime()
+    {
+        return $this->expires;
+    }
+
+    /**
+     * Check whether the cookie should only be sent over secure connections
+     *
+     * @return boolean
+     */
+    public function isSecure()
+    {
+        return $this->secure;
+    }
+
+    /**
+     * Check whether the cookie has expired
+     *
+     * Always returns false if the cookie is a session cookie (has no expiry time)
+     *
+     * @param int $now Timestamp to consider as "now"
+     * @return boolean
+     */
+    public function isExpired($now = null)
+    {
+        if ($now === null) $now = time();
+        if (is_int($this->expires) && $this->expires < $now) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Check whether the cookie is a session cookie (has no expiry time set)
+     *
+     * @return boolean
+     */
+    public function isSessionCookie()
+    {
+        return ($this->expires === null);
+    }
+
+    /**
+     * Checks whether the cookie should be sent or not in a specific scenario
+     *
+     * @param string|EUriHttp $uri URI to check against (secure, domain, path)
+     * @param boolean $matchSessionCookies Whether to send session cookies
+     * @param int $now Override the current time when checking for expiry time
+     * @return boolean
+     */
+    public function match($uri, $matchSessionCookies = true, $now = null)
+    {
+        if (is_string ($uri)) {
+            $uri = EUriHttp::factory($uri);
+        }
+
+        // Make sure we have a valid EUriHttp object
+        if (! ($uri->valid() && ($uri->getScheme() == 'http' || $uri->getScheme() =='https'))) {
+    
+            throw new CException('Passed URI is not a valid HTTP or HTTPS URI');
+        }
+
+        // Check that the cookie is secure (if required) and not expired
+        if ($this->secure && $uri->getScheme() != 'https') return false;
+        if ($this->isExpired($now)) return false;
+        if ($this->isSessionCookie() && ! $matchSessionCookies) return false;
+
+        // Validate domain and path
+        // Domain is validated using tail match, while path is validated using head match
+        $domain_preg = preg_quote($this->getDomain(), "/");
+        if (! preg_match("/{$domain_preg}$/", $uri->getHost())) return false;
+        $path_preg = preg_quote($this->getPath(), "/");
+        if (! preg_match("/^{$path_preg}/", $uri->getPath())) return false;
+
+        // If we didn't die until now, return true.
+        return true;
+    }
+
+    /**
+     * Get the cookie as a string, suitable for sending as a "EHttpCookie" header in an
+     * HTTP request
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->name . '=' . urlencode($this->value) . ';';
+    }
+
+    /**
+     * Generate a new EHttpCookie object from a cookie string
+     * (for example the value of the Set-EHttpCookie HTTP header)
+     *
+     * @param string $cookieStr
+     * @param EUriHttp|string $ref_uri Reference URI for default values (domain, path)
+     * @return EHttpCookie A new EHttpCookie object or false on failure.
+     */
+    public static function fromString($cookieStr, $ref_uri = null)
+    {
+        // Set default values
+        if (is_string($ref_uri)) {
+            $ref_uri = EUriHttp::factory($ref_uri);
+        }
+
+        $name    = '';
+        $value   = '';
+        $domain  = '';
+        $path    = '';
+        $expires = null;
+        $secure  = false;
+        $parts   = explode(';', $cookieStr);
+
+        // If first part does not include '=', fail
+        if (strpos($parts[0], '=') === false) return false;
+
+        // Get the name and value of the cookie
+        list($name, $value) = explode('=', trim(array_shift($parts)), 2);
+        $name  = trim($name);
+        $value = urldecode(trim($value));
+
+        // Set default domain and path
+        if ($ref_uri instanceof EUriHttp) {
+            $domain = $ref_uri->getHost();
+            $path = $ref_uri->getPath();
+            $path = substr($path, 0, strrpos($path, '/'));
+        }
+
+        // Set other cookie parameters
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (strtolower($part) == 'secure') {
+                $secure = true;
+                continue;
+            }
+
+            $keyValue = explode('=', $part, 2);
+            if (count($keyValue) == 2) {
+                list($k, $v) = $keyValue;
+                switch (strtolower($k))    {
+                    case 'expires':
+                        $expires = strtotime($v);
+                        break;
+                    case 'path':
+                        $path = $v;
+                        break;
+                    case 'domain':
+                        $domain = $v;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if ($name !== '') {
+            return new EHttpCookie($name, $value, $domain, $expires, $path, $secure);
+        } else {
+            return false;
+        }
+    }
+}
