@@ -91,7 +91,7 @@ class EFeedItemAtom extends EFeedItemAbstract {
 		{
 			$tag->attributes['type']="html";
 			$element .= CHtml::openTag($tag->name,$tag->attributes);
-			$element .= '<![CDATA["'.PHP_EOL;
+			$element .= '<![CDATA['.PHP_EOL;
 			
 		}else 
 		{
