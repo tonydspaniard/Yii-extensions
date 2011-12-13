@@ -47,13 +47,7 @@ class EGMapMarkerClusterer extends EGMapBase
 		// opt_textColor	String	Text color. The default value is "black".
 		// url				String	Image url.
 		// 
-		'styles' => null,
-		// If you wish to setup custom images for clusterer markers. There should be 
-		// from 1 up to 5
-		// Defaults to http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/images/m
-		'imagesPath' => null,
-		// Image extension, defaults to png
-		'imagesExtension'=>null
+		'styles' => null
 	);
 	/**
 	 * 
