@@ -31,6 +31,12 @@ class EGMapMarkerClusterer extends EGMapBase
 {
 	
 	protected $options = array(
+		// The minimum number of markers to be in a cluster before the markers are hidden and a count
+		'minimumClusterSize' => null,
+		// Wether the center of each cluster should be the average of all markers in the cluster
+		'averageCenetr' => null,
+		// Whether the default behaviour of clicking on cluster is to zoom into it.
+		'zoomOnClick' => null, 
 		// The grid size of a cluster in pixel. Each cluster will be a square. If you want the algorithm to run faster, you can 
 		// set this value larger. The default value is 60.
 		'gridSize' => null,
@@ -43,9 +49,11 @@ class EGMapMarkerClusterer extends EGMapBase
 		// 
 		// height			Number	Image height.
 		// width			Number	Image width.
-		// opt_anchor		Array of Number	Anchor for label text, like [24, 12]. If not set, the text will align center and middle.
-		// opt_textColor	String	Text color. The default value is "black".
+		// anchor			Array of Number	Anchor for label text, like [24, 12]. If not set, the text will align center and middle.
+		// textColor			String	Text color. The default value is "black".
+		// textSize			Number Text size.
 		// url				String	Image url.
+		// backgroundPosition		String The position of the background x, y
 		// 
 		'styles' => null
 	);
