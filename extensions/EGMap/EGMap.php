@@ -695,12 +695,15 @@ class EGMap extends EGMapBase {
 	/**
 	 * @param EGMapPolygon $polygon a polygon to be put on the map
 	 * @since 2011-03-10 Matt Kay
-	 * 		Added this function for polygons based on addMarker without info window(TODO)
+	 * 		Added this function for polygons based on addMarker
+	 * @since 2011-17-12 Added info window support
 	 */
 	public function addPolygon(EGMapPolygon $polygon)
 	{
 		if (null === $this->resources->itemAt('polygons'))
 			$this->resources->add('polygons', new CTypedList('EGMapPolygon'));
+		if ($polygon->getHtmlInfoWindow() && $polygon->htmlInfoWindowShared() && !$this->getGlobalVariable($this->getJsName() . '_info_window'))
+			$this->addGlobalVariable($this->getJsName() . '_info_window', 'null');
 		$this->resources->itemAt('polygons')->add($polygon);
 	}
 
