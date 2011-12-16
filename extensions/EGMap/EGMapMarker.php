@@ -43,6 +43,9 @@
  */
 class EGMapMarker extends EGMapBase {
 
+	const DROP = 'google.maps.Animation.DROP';
+	const BOUNCE = 'google.maps.Animation.BOUNCE';
+	
 	protected $options = array(
 		//  Map  Map on which to display Marker.  
 		'map' => null,
@@ -71,6 +74,8 @@ class EGMapMarker extends EGMapBase {
 		'flat' => null,
 		// number  All Markers are displayed on the map in order of their zIndex, with higher values displaying in front of Markers with lower values. By default, Markers are displayed according to their latitude, with Markers of lower latitudes appearing in front of Markers at higher latitudes.  
 		'zIndex' => null,
+		//Which animation to play when marker is added to a map.
+		'animation'=>null,
 	);
 	protected $info_window = null;
 	protected $info_window_shared = false;
@@ -130,6 +135,18 @@ class EGMapMarker extends EGMapBase {
 		}
 	}
 
+	/**
+	 * Sets the animation to the marker when it is rendered to the map
+	 * @param string $animation 
+	 */
+	public function setAnimation( $animation=self::DROP )
+	{
+		if($animation==self::DROP || $animation==self::BOUNCE)
+			$this->options['animation'] = $animation;
+		else
+			$this->options['animation'] = self::DROP;
+	}
+	
 	/**
 	 * Adds an event listener to the marker
 	 *
