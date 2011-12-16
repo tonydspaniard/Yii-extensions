@@ -205,14 +205,11 @@ class EGMapClient
 		if (function_exists('curl_version'))
 		{
 			$ch = curl_init();
-
-			curl_setopt($ch, CURLOPT_URL, $apiURL);
+			curl_setopt($ch, CURLOPT_URL, $apiUrl);
 			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-			$raw_data = curl_exec($ch);
+			$raw_data = $this->_curl_exec_follow($ch);
 			curl_close($ch);
 		}
 		else // no CUrl, try differently
@@ -235,14 +232,11 @@ class EGMapClient
 		if (function_exists('curl_version'))
 		{
 			$ch = curl_init();
-
-			curl_setopt($ch, CURLOPT_URL, $apiURL);
+			curl_setopt($ch, CURLOPT_URL, $apiUrl);
 			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-			$raw_data = curl_exec($ch);
+			$raw_data = $this->_curl_exec_follow($ch);
 			curl_close($ch);
 		}
 		else // no CUrl, try differently
@@ -250,6 +244,67 @@ class EGMapClient
 
 		return $raw_data;
 	}
+	
+	/**
+	 * This function handles redirections with CURL if safe_mode or open_basedir 
+	 * is enabled. 
+	 * @param resource $h the curl handle
+	 * @param integer $maxredirections 
+	 */
+	private function _curl_exec_follow(&$ch, $maxredirections = 5)
+	{
+		if (ini_get('open_basedir') == '' && ini_get('safe_mode') == 'Off')
+		{
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $maxredirections > 0);
+			curl_setopt($ch, CURLOPT_MAXREDIRS, $maxredirections);
+		} else
+		{
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+			if ($maxredirections > 0)
+			{
+				$new_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+
+				$rch = curl_copy_handle($ch);
+				curl_setopt($rch, CURLOPT_HEADER, true);
+				curl_setopt($rch, CURLOPT_NOBODY, true);
+				curl_setopt($rch, CURLOPT_FORBID_REUSE, false);
+				curl_setopt($rch, CURLOPT_RETURNTRANSFER, true);
+				do
+				{
+					curl_setopt($rch, CURLOPT_URL, $new_url);
+					$header = curl_exec($rch);
+
+					if (curl_errno($rch))
+						$code = 0;
+					else
+					{
+						$code = curl_getinfo($rch, CURLINFO_HTTP_CODE);
+						if ($code == 301 || $code == 302)
+						{
+							preg_match('/Location:(.*?)\n/', $header, $matches);
+							$new_url = trim(array_pop($matches));
+						}
+						else
+							$code = 0;
+					}
+				} while ($code && --$maxredirections);
+
+				curl_close($rch);
+
+				if (!$maxredirections)
+				{
+					if ($maxredirections === null)
+						throw new CHttpException(301, 'Too many redirects. When following redirects, libcurl hit the maximum amount.');
+					else
+						$maxredirections = 0;
+					return false;
+				}
+				curl_setopt($ch, CURLOPT_URL, $new_url);
+			}
+		}
+		return curl_exec($ch);
+	}
+
 
 }
 
