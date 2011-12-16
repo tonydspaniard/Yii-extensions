@@ -475,6 +475,10 @@ class EGMap extends EGMapBase {
 	 * 		  removed deprecated initialization procedures //$init_events[] = $this->getIconsJs();
 	 * @since 2011-01-22 Antonio Ramirez
 	 * 		  Added support for key drag and marker clusterer plugin
+	 * @since 2011-03-10 Matt Kay
+  	 * 		  Added polygon support (added to init_events)
+	 * @since 2011-03-23 Antonio Ramirez
+	 *		  Added circles and rectangles support
 	 */
 	public function registerMapScript($afterInit=array(), $language = null, $region = null, $position = CClientScript::POS_LOAD)
 	{
@@ -507,6 +511,9 @@ class EGMap extends EGMapBase {
 		$init_events[] = $this->getMarkersJs();
 		$init_events[] = $this->getDirectionsJs();
 		$init_events[] = $this->getPluginsJs();
+		$init_events[] = $this->getPolygonsJs();
+		$init_events[] = $this->getCirclesJs();
+		$init_events[] = $this->getRectanglesJs();
 
 		if (is_array($afterInit))
 		{
@@ -684,7 +691,44 @@ class EGMap extends EGMapBase {
 			$this->registerPlugin('EGMapMarkerWithLabel');
 		$this->resources->itemAt('markers')->add($marker);
 	}
+	
+	/**
+	 * @param EGMapPolygon $polygon a polygon to be put on the map
+	 * @since 2011-03-10 Matt Kay
+	 * 		Added this function for polygons based on addMarker without info window(TODO)
+	 */
+	public function addPolygon(EGMapPolygon $polygon)
+	{
+		if (null === $this->resources->itemAt('polygons'))
+			$this->resources->add('polygons', new CTypedList('EGMapPolygon'));
+		$this->resources->itemAt('polygons')->add($polygon);
+	}
 
+	/**
+	 * @param EGMapCircle $circle a circle to be put on the map
+	 * @since 2011-03-23 Antonio Ramirez Cobos
+	 */
+	public function addCircle(EGMapCircle $circle)
+	{
+		if (null === $this->resources->itemAt('circles'))
+			$this->resources->add('circles', new CTypedList('EGMapCircle'));
+		if ($circle->getHtmlInfoWindow() && $circle->htmlInfoWindowShared() && !$this->getGlobalVariable($this->getJsName() . '_info_window'))
+			$this->addGlobalVariable($this->getJsName() . '_info_window', 'null');
+		$this->resources->itemAt('circles')->add($circle);
+	}
+
+	/**
+	 * @param EGMapRectangle $rectangle a rectangle to be put on the map
+	 * @since 2011-03-23 Antonio Ramirez Cobos
+	 */
+	public function addRectangle(EGMapRectangle $rectangle)
+	{
+		if (null === $this->resources->itemAt('rectangles'))
+			$this->resources->add('rectangles', new CTypedList('EGMapRectangle'));
+		if ($rectangle->getHtmlInfoWindow() && $rectangle->htmlInfoWindowShared() && !$this->getGlobalVariable($this->getJsName() . '_info_window'))
+			$this->addGlobalVariable($this->getJsName() . '_info_window', 'null');
+		$this->resources->itemAt('rectangles')->add($rectangle);
+	}
 	/**
 	 * @param EGMapMarker[] $markers marker to be put on the map
 	 * @since 2011-01-22 Antonio Ramirez
@@ -796,7 +840,67 @@ class EGMap extends EGMapBase {
 		}
 		return $return;
 	}
+	
+	/**
+	 * Returns the javascript string which defines the polygons
+	 * @return string
+	 * @since 2011-03-10 Matt Kay
+	 * 		 Added function based on getMarkersJs
+	 */
+	public function getPolygonsJs()
+	{
+		$return = '';
+		if (null !== $this->resources->itemAt('polygons'))
+		{
+			foreach ($this->resources->itemAt('polygons') as $polygon)
+			{
+				$return .= $polygon->toJs($this->getJsName());
+				$return .= "\n      ";
+			}
+		}
+		return $return;
+	}
 
+	/**
+	 * Returns the javascript string which defines the circles
+	 * @return string
+	 * @since 2011-03-23 Antonio Ramirez
+	 * 	
+	 */
+	public function getCirclesJs()
+	{
+		$return = '';
+		if (null !== $this->resources->itemAt('circles'))
+		{
+			foreach ($this->resources->itemAt('circles') as $circle)
+			{
+				$return .= $circle->toJs($this->getJsName());
+				$return .= "\n      ";
+			}
+		}
+		return $return;
+	}
+
+	/**
+	 * Returns the javascript string which defines rectangles
+	 * @return string
+	 * @since 2011-03-23 Antonio Ramirez
+	 * 	
+	 */
+	public function getRectanglesJs()
+	{
+		$return = '';
+		if (null !== $this->resources->itemAt('rectangles'))
+		{
+			foreach ($this->resources->itemAt('rectangles') as $rectangle)
+			{
+				$return .= $rectangle->toJs($this->getJsName());
+				$return .= "\n      ";
+			}
+		}
+		return $return;
+	}
+	
 	/**
 	 * Get the directions javascript code
 	 *
