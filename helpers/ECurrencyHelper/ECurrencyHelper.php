@@ -84,6 +84,13 @@ class ECurrencyHelper
 	const USE_YAHOO = 'Yahoo';
 	
 	/**
+	 * Constants to return info of a currency code
+	 */
+	const CURRENCY_INFO_NAME = 0;
+	const CURRENCY_INFO_HEX = 1;
+	const CURRENCY_INFO_ALL = 2;
+	const CURRENCY_NO_INFO = -1;
+	/**
 	 *
 	 * @var string $uri the URL to access the daily rates from 
 	 */
