@@ -103,6 +103,129 @@ class ECurrencyHelper
 	 * @var array $currencies the loaded currency rates
 	 */
 	protected $currencies = array();
+	
+	/**
+	 *
+	 * @var array currency information for currency symbols
+	 */
+	protected static $countriesCurrrency = array(
+		'ALL' => array('Albania Lek', '&#76;&#101;&#107;'),
+		'AFN' => array('Afghanistan Afghani', '&#1547;'),
+		'ARS' => array('Argentina Peso', '&#36;'),
+		'AWG' => array('Aruba Guilder', '&#402;'),
+		'AUD' => array('Australia Dollar', '&#36;'),
+		'AZN' => array('Azerbaijan New Manat', '&#1084;&#1072;&#1085;'),
+		'BSD' => array('Bahamas Dollar', '&#36;'),
+		'BBD' => array('Barbados Dollar', '&#36;'),
+		'BYR' => array('Belarus Ruble', '&#112;&#46;'),
+		'BZD' => array('Belize Dollar', '&#66;&#90;&#36;'),
+		'BMD' => array('Bermuda Dollar', '&#36;'),
+		'BOB' => array('Bolivia Boliviano', '&#36;&#98;'),
+		'BAM' => array('Bosnia and Herzegovina Convertible Marka', '&#75;&#77;'),
+		'BWP' => array('Botswana Pula', '&#80;'),
+		'BGN' => array('Bulgaria Lev', '&#1083;&#1074;'),
+		'BRL' => array('Brazil Real', '&#82;&#36;'),
+		'BND' => array('Brunei Darussalam Dollar', '&#36;'),
+		'KHR' => array('Cambodia Riel', '&#6107;'),
+		'CAD' => array('Canada Dollar', '&#36;'),
+		'KYD' => array('Cayman Islands Dollar', '&#36;'),
+		'CLP' => array('Chile Peso', '&#36;'),
+		'CNY' => array('China Yuan Renminbi', '&#165;'),
+		'COP' => array('Colombia Peso', '&#36;'),
+		'CRC' => array('Costa Rica Colon', '&#8353;'),
+		'HRK' => array('Croatia Kuna', '&#107;&#110;'),
+		'CUP' => array('Cuba Peso', '&#8369;'),
+		'CZK' => array('Czech Republic Koruna', '&#75;&#269;'),
+		'DKK' => array('Denmark Krone', '&#107;&#114;'),
+		'DOP' => array('Dominican Republic Peso', '&#82;&#68;&#36;'),
+		'XCD' => array('East Caribbean Dollar', '&#36;'),
+		'EGP' => array('Egypt Pound', '&#163;'),
+		'SVC' => array('El Salvador Colon', '&#36;'),
+		'EEK' => array('Estonia Kroon', '&#107;&#114;'),
+		'EUR' => array('Euro Member Countries', '&#8364;'),
+		'FKP' => array('Falkland Islands (Malvinas) Pound', '&#163;'),
+		'FJD' => array('Fiji Dollar', '&#36;'),
+		'GHC' => array('Ghana Cedis', '&#162;'),
+		'GIP' => array('Gibraltar Pound', '&#163;'),
+		'GTQ' => array('Guatemala Quetzal', '&#81;'),
+		'GGP' => array('Guernsey Pound', '&#163;'),
+		'GYD' => array('Guyana Dollar', '&#36;'),
+		'HNL' => array('Honduras Lempira', '&#76;'),
+		'HKD' => array('Hong Kong Dollar', '&#36;'),
+		'HUF' => array('Hungary Forint', '&#70;&#116;'),
+		'ISK' => array('Iceland Krona', '&#107;&#114;'),
+		'INR' => array('India Rupee', '₹'),
+		'IDR' => array('Indonesia Rupiah', '&#82;&#112;'),
+		'IRR' => array('Iran Rial', '&#65020;'),
+		'IMP' => array('Isle of Man Pound', '&#163;'),
+		'ILS' => array('Israel Shekel', '&#8362;'),
+		'JMD' => array('Jamaica Dollar', '&#74;&#36;'),
+		'JPY' => array('Japan Yen', '&#165;'),
+		'JEP' => array('Jersey Pound', '&#163;'),
+		'KZT' => array('Kazakhstan Tenge', '&#1083;&#1074;'),
+		'KPW' => array('Korea (North) Won', '&#8361;'),
+		'KRW' => array('Korea (South) Won', '&#8361;'),
+		'KGS' => array('Kyrgyzstan Som', '&#1083;&#1074;'),
+		'LAK' => array('Laos Kip', '&#8365;'),
+		'LVL' => array('Latvia Lat', '&#76;&#115;'),
+		'LBP' => array('Lebanon Pound', '&#163;'),
+		'LRD' => array('Liberia Dollar', '&#36;'),
+		'LTL' => array('Lithuania Litas', '&#76;&#116;'),
+		'MKD' => array('Macedonia Denar', '&#1076;&#1077;&#1085;'),
+		'MYR' => array('Malaysia Ringgit', '&#82;&#77;'),
+		'MUR' => array('Mauritius Rupee', '&#8360;'),
+		'MXN' => array('Mexico Peso', '&#36;'),
+		'MNT' => array('Mongolia Tughrik', '&#8366;'),
+		'MZN' => array('Mozambique Metical', '&#77;&#84;'),
+		'NAD' => array('Namibia Dollar', '&#36;'),
+		'NPR' => array('Nepal Rupee', '&#8360;'),
+		'ANG' => array('Netherlands Antilles Guilder', '&#402;'),
+		'NZD' => array('New Zealand Dollar', '&#36;'),
+		'NIO' => array('Nicaragua Cordoba', '&#67;&#36;'),
+		'NGN' => array('Nigeria Naira', '&#8358;'),
+		'KPW' => array('Korea (North) Won', '&#8361;'),
+		'NOK' => array('Norway Krone', '&#107;&#114;'),
+		'OMR' => array('Oman Rial', '&#65020;'),
+		'PKR' => array('Pakistan Rupee', '&#8360;'),
+		'PAB' => array('Panama Balboa', '&#66;&#47;&#46;'),
+		'PYG' => array('Paraguay Guarani', '&#71;&#115;'),
+		'PEN' => array('Peru Nuevo Sol', '&#83;&#47;&#46;'),
+		'PHP' => array('Philippines Peso', '&#8369;'),
+		'PLN' => array('Poland Zloty', '&#122;&#322;'),
+		'QAR' => array('Qatar Riyal', '&#65020;'),
+		'RON' => array('Romania New Leu', '&#108;&#101;&#105;'),
+		'RUB' => array('Russia Ruble', '&#1088;&#1091;&#1073;'),
+		'SHP' => array('Saint Helena Pound', '&#163;'),
+		'SAR' => array('Saudi Arabia Riyal', '&#65020;'),
+		'RSD' => array('Serbia Dinar', '&#1044;&#1080;&#1085;&#46;'),
+		'SCR' => array('Seychelles Rupee', '&#8360;'),
+		'SGD' => array('Singapore Dollar', '&#36;'),
+		'SBD' => array('Solomon Islands Dollar', '&#36;'),
+		'SOS' => array('Somalia Shilling', '&#83;'),
+		'ZAR' => array('South Africa Rand', '&#82;'),
+		'LKR' => array('Sri Lanka Rupee', '&#8360;'),
+		'SEK' => array('Sweden Krona', '&#107;&#114;'),
+		'SLL' => array('Sierra Leona Lions', 'Le'),
+		'CHF' => array('Switzerland Franc', '&#67;&#72;&#70;'),
+		'SRD' => array('Suriname Dollar', '&#36;'),
+		'SYP' => array('Syria Pound', '&#163;'),
+		'TWD' => array('Taiwan New Dollar', '&#78;&#84;&#36;'),
+		'THB' => array('Thailand Baht', '&#3647;'),
+		'TTD' => array('Trinidad and Tobago Dollar', '&#84;&#84;&#36;'),
+		'TRY' => array('Turkey Lira', '&#84;&#76;'),
+		'TRL' => array('Turkey Lira', '&#8356;'),
+		'TVD' => array('Tuvalu Dollar', '&#36;'),
+		'UAH' => array('Ukraine Hryvna', '&#8372;'),
+		'GBP' => array('United Kingdom Pound', '&#163;'),
+		'USD' => array('United States Dollar', '&#36;'),
+		'UYU' => array('Uruguay Peso', '&#36;&#85;'),
+		'UZS' => array('Uzbekistan Som', '&#1083;&#1074;'),
+		'VEF' => array('Venezuela Bolivar Fuerte', '&#66;&#115;'),
+		'VND' => array('Viet Nam Dong', '&#8363;'),
+		'YER' => array('Yemen Rial', '&#65020;'),
+		'ZWD' => array('Zimbabwe Dollar', '&#90;&#36;')
+	);
+	
 	/**
 	 * Class constructor
 	 */
@@ -182,6 +305,30 @@ class ECurrencyHelper
 		
 		return $result;
 	}
+	
+	
+	/**
+	 * Returns specific currency information
+	 * @param string $code the currency code on 3 letter ISO 4217
+	 * @param integer $info the information to return
+	 * @return mixed the requested info
+	 */
+	public static function currencyInfo($code, $info = self::CURRENCY_INFO_HEX)
+	{
+		if (array_key_exists($code, self::$countriesCurrrency))
+		{
+			switch ($info)
+			{
+				case self::CURRENCY_INFO_HEX:
+				case self::CURRENCY_INFO_NAME:
+					return self::$countriesCurrrency[$code][$info];
+				case self::CURRENCY_INFO_ALL:
+					return self::$countriesCurrrency[$code];
+			}
+		}
+		return self::CURRENCY_NO_INFO;
+	}
+	
 	/**
 	 * Converts one currency to another based on the EURO conversion rate
 	 * @param string $from the currency code to convert from
@@ -245,18 +392,78 @@ class ECurrencyHelper
 	 */
 	private function _request($url)
 	{
-	    if (function_exists('curl_version')) {
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$raw_data = curl_exec($ch);
-		curl_close($ch);
-	    } else // no CUrl, try differently
-		$raw_data = file_get_contents($url);
-	    return $raw_data;
+		if (function_exists('curl_version'))
+		{
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
+			$raw_data = $this->_curl_exec_follow($ch);
+			curl_close($ch);
+		} else // no CUrl, try differently
+			$raw_data = file_get_contents($url);
+		return $raw_data;
+	}
+
+	/**
+	 * This function handles redirections with CURL if safe_mode or open_basedir 
+	 * is enabled. 
+	 * @param resource $h the curl handle
+	 * @param integer $maxredirections 
+	 */
+	private function _curl_exec_follow($ch, $maxredirections = 5)
+	{
+		if (init_get('open_basedir') == '' && ini_get('safe_mode') == 'Off')
+		{
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $maxredirections > 0);
+			curl_setopt($ch, CURLOPT_MAXREDIRS, $maxredirections);
+		} else
+		{
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+			if ($maxredirections > 0)
+			{
+				$new_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+
+				$rch = curl_copy_handle($ch);
+				curl_setopt($rch, CURLOPT_HEADER, true);
+				curl_setopt($rch, CURLOPT_NOBODY, true);
+				curl_setopt($rch, CURLOPT_FORBID_REUSE, false);
+				curl_setopt($rch, CURLOPT_RETURNTRANSFER, true);
+				do
+				{
+					curl_setopt($rch, CURLOPT_URL, $new_url);
+					$header = curl_exec($rch);
+
+					if (curl_errno($rch))
+						$code = 0;
+					else
+					{
+						$code = curl_getinfo($rch, CURLINFO_HTTP_CODE);
+						if ($code == 301 || $code == 302)
+						{
+							preg_match('/Location:(.*?)\n/', $header, $matches);
+							$new_url = trim(array_pop($matches));
+						}
+						else
+							$code = 0;
+					}
+				} while ($code && --$maxredirections);
+
+				curl_close($rch);
+
+				if (!$maxredirections)
+				{
+					if ($maxredirections === null)
+						throw new CHttpException(301, 'Too many redirects. When following redirects, libcurl hit the maximum amount.');
+					else
+						$maxredirections = 0;
+					return false;
+				}
+				curl_setopt($ch, CURLOPT_URL, $new_url);
+			}
+		}
+		return curl_exec($ch);
 	}
 
 }
