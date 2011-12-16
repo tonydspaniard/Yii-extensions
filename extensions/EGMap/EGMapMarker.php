@@ -162,11 +162,12 @@ class EGMapMarker extends EGMapBase {
 	 *
 	 * @param string $js_name
 	 * @param EGMapGeocodedAddress $gmap_geocoded_address
+	 * @param array $options the marker options
 	 * @return EGMapMarker
 	 */
-	public static function constructFromGMapGeocodedAddress(EGMapGeocodedAddress $gmap_geocoded_address, $js_name='marker')
+	public static function constructFromGMapGeocodedAddress(EGMapGeocodedAddress $gmap_geocoded_address, $options = array(), $js_name='marker')
 	{
-		return new EGMapMarker($gmap_geocoded_address->getLat(), $gmap_geocoded_address->getLng(), $js_name);
+		return new EGMapMarker($gmap_geocoded_address->getLat(), $gmap_geocoded_address->getLng(), $options, $js_name);
 	}
 
 	/**
