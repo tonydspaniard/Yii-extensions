@@ -31,11 +31,16 @@
 class EGMapClient
 {
 	/**
-	* The URL for the RESTful geocode API.
-	* @since 2011-03-23 Matt Cheale Updated URL from v2 to v3 of the API.
-	* @since 2011-04-21 Matt Cheale Removed the format option so it can be customised in the geocoding methods.
+	 * The URL for the RESTful geocode API.
+	 * @since 2011-03-23 Matt Cheale Updated URL from v2 to v3 of the API.
+	 * @since 2011-04-21 Matt Cheale Removed the format option so it can be customised in the geocoding methods.
+	 * @since 2011-12-19 Antonio Ramirez renamed to make use of more APIs
 	*/
-	const API_URL = 'http://maps.googleapis.com/maps/api/geocode/';
+	const API_GEOCODE_URL = 'http://maps.googleapis.com/maps/api/geocode/';
+	/**
+	 * The URL for the RESTful elevation API
+	 */
+	const API_ELEVATION_URL = 'http://maps.googleapis.com/maps/api/elevation/';
 
 	/**
 	 *
@@ -146,7 +151,7 @@ class EGMapClient
 	 */
 	public function getGeocodingInfo($address, $format = 'json')
 	{
-		$apiURL = self::API_URL . $format . '?address=' . urlencode($address) . '&sensor=false';
+		$apiURL = self::API_GEOCODE_URL . $format . '?address=' . urlencode($address) . '&sensor=false';
 		return $this->callApi($apiURL);
 	}
 
@@ -159,10 +164,24 @@ class EGMapClient
 	 * @since 2010-12-22 modified by Antonio Ramirez (CUrl call)
 	 * @since 2011-03-23 Matt Cheale Updated the query string to use v3 API variables.
 	 * @since 2011-04-21 Matt Cheale Added format option and moved HTTP call to another function.
+	 * @since 2011-12-19 Antonio Ramirez modified API call
 	 */
 	public function getReverseGeocodingInfo($lat, $lng, $format = 'json')
 	{
-		$apiURL = self::API_URL . $format . '?latlng=' . $lat . ',' . $lng . '&sensor=false';
+		$apiURL = self::API_GEOCODE_URL . $format . '?latlng=' . $lat . ',' . $lng . '&sensor=false';
+		return $this->callApi($apiURL);
+	}
+	/**
+	 * Elevation info request
+	 * 
+	 * @param string $locations the coordinates array to get elevation info from
+	 * @param string $format 'xml' or 'json'
+	 * @return string
+	 * @author Antonio Ramirez
+	 */
+	public function getElevationInfo($locations, $format = 'json')
+	{
+		$apiURL = self::API_ELEVATION_URL . $format . '?locations=' . $locations  . '&sensor=false';
 		return $this->callApi($apiURL);
 	}
 	/**
