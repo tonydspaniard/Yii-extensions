@@ -195,12 +195,10 @@ class EGMapClient
 	public function getGeocodingInfo($address, $format = 'csv')
 	{
 
-		$apiUrl = CChoiceFormat::format($this->geoCodingInfotemplate, array('{api}' => self::API_URL,
-				'{format}' => $format,
-				'{key}' => $this->getAPIKey(),
-				'{address}' => urlencode($address)));
-
-		$apiURL = self::API_URL . '&output=' . $format . '&key=' . $this->getAPIKey() . '&q=' . urlencode($address);
+		$apiUrl = str_replace(
+			array('{api}','{format}','{key}','{address}'),
+			array(self::API_URL, $format, $this->getAPIKey(), urlencode($address)),
+			$this->geoCodingInfotemplate);
 
 		if (function_exists('curl_version'))
 		{
@@ -213,7 +211,7 @@ class EGMapClient
 			curl_close($ch);
 		}
 		else // no CUrl, try differently
-			$raw_data = file_get_contents($apiURL);
+			$raw_data = file_get_contents($apiUrl);
 
 		return $raw_data;
 	}

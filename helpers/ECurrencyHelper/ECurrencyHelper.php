@@ -421,7 +421,7 @@ class ECurrencyHelper
 	 */
 	private function _curl_exec_follow($ch, $maxredirections = 5)
 	{
-		if (init_get('open_basedir') == '' && ini_get('safe_mode') == 'Off')
+		if (ini_get('open_basedir') == '' && ini_get('safe_mode') == 'Off')
 		{
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $maxredirections > 0);
 			curl_setopt($ch, CURLOPT_MAXREDIRS, $maxredirections);
