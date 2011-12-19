@@ -72,19 +72,23 @@ class EGMapGeocodedAddress
 	 * @param  EGMapClient $gmap_client
 	 * @return integer $accuracy
 	 * @author Fabrice Bernhard
+	 * @since 2011-04-21 Matt Cheale Updated to parse API V3 JSON response.
 	 */
 	public function geocode($gmap_client)
-	{
+	{	
 		$raw_data = $gmap_client->getGeocodingInfo($this->getRawAddress());
-		$geocoded_array = explode(',', $raw_data);
-		if ($geocoded_array[0] != 200)
-		{
+		$data = CJSON::decode($raw_data);
 
+		if ('OK' != $data['status'])
+		{
 			return false;
 		}
-		$this->lat = $geocoded_array[2];
-		$this->lng = $geocoded_array[3];
-		$this->accuracy = $geocoded_array[1];
+
+		$location = $data['results'][0]['geometry'];
+
+		$this->lat = $location['location']['lat'];
+		$this->lng = $location['location']['lng'];
+		$this->accuracy = $location['location_type'];
 
 		return $this->accuracy;
 	}
@@ -95,26 +99,61 @@ class EGMapGeocodedAddress
 	 * @return integer
 	 * @author Vincent Guillon <vincentg@theodo.fr>
 	 * @since 2010-03-04
+	 * @since 2011-03-23 Matt Cheale Updated mapping from v2 to v3 of the API result format.
 	 */
 	public function reverseGeocode($gmap_client)
 	{
 		$raw_data = $gmap_client->getReverseGeocodingInfo($this->getLat(), $this->getLng());
-		$geocoded_array = json_decode($raw_data, true);
+		$geocoded_array = CJSON::decode($raw_data, true);
 
-		if ($geocoded_array['Status']['code'] != 200)
+		if ($geocoded_array['status'] != 'OK')
 		{
-
 			return false;
 		}
 
-		$this->raw_address = $geocoded_array['Placemark'][0]['address'];
-		$this->accuracy = $geocoded_array['Placemark'][0]['AddressDetails']['Accuracy'];
-		$this->geocoded_city = $geocoded_array['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']['LocalityName'];
-		$this->geocoded_country_code = $geocoded_array['Placemark'][0]['AddressDetails']['Country']['CountryNameCode'];
-		$this->geocoded_country = $geocoded_array['Placemark'][0]['AddressDetails']['Country']['CountryName'];
-		$this->geocoded_address = $geocoded_array['Placemark'][0]['address'];
-		$this->geocoded_street = $geocoded_array['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']['Thoroughfare']['ThoroughfareName'];
-		$this->geocoded_postal_code = $geocoded_array['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']['PostalCode']['PostalCodeNumber'];
+		$result = $geocoded_array['results'][0];
+		$address_components = $result['address_components'];
+		$this->raw_address = $result['formatted_address'];
+		$this->geocoded_address = $result['formatted_address'];
+		$this->accuracy = $result['types'][0];
+
+		$map = array(
+			'street_address' => 'geocoded_street',
+			'route' => 'geocoded_street',
+			'country' => 'geocoded_country',
+			'locality' => 'geocoded_city',
+			'postal_code' => 'geocoded_postal_code',
+		);
+
+		foreach ($address_components as $component)
+		{
+			foreach ($component['types'] as $type)
+			{
+				switch ($type)
+				{
+					case 'street_address':
+					case 'route':
+						$this->geocoded_street = $component['long_name'];
+						break;
+
+					case 'country':
+						$this->geocoded_country = $component['long_name'];
+						$this->geocoded_country_code = $component['short_name'];
+						break;
+
+					case 'locality':
+						$this->geocoded_city = $component['long_name'];
+						break;
+
+					case 'postal_code':
+						$this->geocoded_postal_code = $component['long_name'];
+						break;
+
+					default:
+					// Do nothing
+				}
+			}
+		}
 
 		return $this->accuracy;
 	}
@@ -127,43 +166,54 @@ class EGMapGeocodedAddress
 	 * @return integer $accuracy
 	 * @author Fabrice Bernhard
 	 * @since 2010-12-22 modified by utf8_encode removed Antonio Ramirez
+	 * @since 2011-04-21 Matt Cheale Updated to parse API V3 JSON response.
 	 */
 	public function geocodeXml($gmap_client)
 	{
 		$raw_data = $gmap_client->getGeocodingInfo($this->getRawAddress(), 'xml');
+		$xml = simplexml_load_string($raw_data);
 
-		$p = xml_parser_create('UTF-8');
-		xml_parse_into_struct($p, $raw_data, $vals, $index);
-		xml_parser_free($p);
-
-		if ($vals[$index['CODE'][0]]['value'] != 200)
+		if ('OK' != $xml->status)
 		{
-
 			return false;
 		}
 
-		$coordinates = $vals[$index['COORDINATES'][0]]['value'];
-		list($this->lng, $this->lat) = explode(',', $coordinates);
-
-		$this->accuracy = $vals[$index['ADDRESSDETAILS'][0]]['attributes']['ACCURACY'];
-
-		// We voluntarily silence errors, the values will still be set to NULL if the array indexes are not defined
-		// @author Fabrice Bernard
-		@$this->geocoded_address = $vals[$index['ADDRESS'][0]]['value'];
-		@$this->geocoded_street = $vals[$index['THOROUGHFARENAME'][0]]['value'];
-		@$this->geocoded_postal_code = $vals[$index['POSTALCODENUMBER'][0]]['value'];
-		@$this->geocoded_country = $vals[$index['COUNTRYNAME'][0]]['value'];
-		@$this->geocoded_country_code = $vals[$index['COUNTRYNAMECODE'][0]]['value'];
-
-		@$this->geocoded_city = $vals[$index['LOCALITYNAME'][0]]['value'];
-		if (empty($this->geocoded_city))
+		foreach ($xml->result->address_component as $component)
 		{
-			@$this->geocoded_city = $vals[$index['SUBADMINISTRATIVEAREANAME'][0]]['value'];
+			$longName = (string) $component->long_name;
+			$shortName = (string) $component->short_name;
+			foreach ($component->type as $type)
+			{
+				switch ($type)
+				{
+					case 'street_address':
+					case 'route':
+						$this->geocoded_street = $longName;
+						break;
+
+					case 'country':
+						$this->geocoded_country = $longName;
+						$this->geocoded_country_code = $shortName;
+						break;
+
+					case 'locality':
+						$this->geocoded_city = $shortName;
+						break;
+
+					case 'postal_code':
+						$this->geocoded_postal_code = $longName;
+						break;
+
+					default:
+					// Do nothing
+				}
+			}
 		}
-		if (empty($this->geocoded_city))
-		{
-			@$this->geocoded_city = $vals[$index['ADMINISTRATIVEAREANAME'][0]]['value'];
-		}
+
+		$this->lat = (double) $xml->result->geometry->location->lat;
+		$this->lng = (double) $xml->result->geometry->location->lng;
+
+		$this->accuracy = (string) $xml->result->geometry->location_type;
 
 		return $this->accuracy;
 	}

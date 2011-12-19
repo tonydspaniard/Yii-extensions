@@ -30,27 +30,12 @@
  */
 class EGMapClient
 {
-	const API_URL = 'http://maps.google.com/maps/geo?';
-	const JS_URL = 'http://maps.google.com/maps/api/js?sensor=false';
 	/**
-	 *
-	 * getCoding parameter info template.
-	 * @var string
-	 */
-	protected $geoCodingInfotemplate = '{api}&output={format}&key={key}&q={address}';
-	/**
-	 * API key array
-	 *
-	 * @var EGMapApiKeyList $api_keys
-	 */
-	protected $api_keys = null;
-	/**
-	 *
-	 * Holds default domain
-	 * domains specified active API key
-	 * @var string
-	 */
-	private $_default_domain = 'localhost';
+	* The URL for the RESTful geocode API.
+	* @since 2011-03-23 Matt Cheale Updated URL from v2 to v3 of the API.
+	* @since 2011-04-21 Matt Cheale Removed the format option so it can be customised in the geocoding methods.
+	*/
+	const API_URL = 'http://maps.googleapis.com/maps/api/geocode/';
 
 	/**
 	 *
@@ -61,89 +46,60 @@ class EGMapClient
 	 *     $gmapclient = new EGMapClient( array('domain'=>'googlekeyhere') );
 	 * </pre>
 	 * @param array $key
+	 * @since 2011-04-21 Matt Cheale $key parameter deprecated
 	 */
-	public function __construct($key = array())
-	{
-		// $key = array( 'domain' => 'googlekeyhere' );
-		$this->api_keys = new EGMapApiKeyList();
-
-		if (!empty($key) && !is_scalar($key))
-		{
-			list( $domain, $key ) = each($key);
-			$this->setAPIKey($domain, $key);
-		}
-	}
+	public function __construct($key = array()){}
 
 	/**
 	 * Sets the Google Maps API key
 	 * @param string $key
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as API Keys are no longer required.
 	 */
-	public function setAPIKey($domain, $key, $setAsDefault = false)
-	{
-		if ($this->api_keys === null)
-			$this->api_keys = new EGMapApiKeyList();
-
-
-		$this->api_keys->addAPIKey($domain, $key);
-
-		if (true === $setAsDefault)
-			$this->setDomain($domain);
-	}
+	public function setAPIKey($domain, $key, $setAsDefault = false){}
 
 	/**
 	 *
 	 * Sets default API key
 	 * @param string $domain
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as API Keys are no longer required.
 	 */
-	public function setDomain($domain)
-	{
-
-		$this->_default_domain = $domain;
-	}
+	public function setDomain($domain){}
 
 	/**
 	 * Gets the Google Maps API key
 	 * @return string $key
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as API Keys are no longer required.
 	 */
-	public function getAPIKey($domain = null)
-	{
-		$domain = (null === $domain ? $this->_default_domain : $domain);
-		return $this->api_keys->getAPIKeyByDomain($domain);
-	}
+	public function getAPIKey($domain = null){}
 
 	/**
 	 * Guesses and sets default API Key
-	 *
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as API Keys are no longer required.
 	 */
-	protected function guessAndSetAPIKey($key)
-	{
-		$this->setAPIKey($this->guessDomain(), $key, true);
-	}
+	protected function guessAndSetAPIKey($key){}
 
 	/**
 	 * Guesses the current domain
 	 * @return string $domain
 	 * @author Antonio Ramirez Cobos
-	 *
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as API Keys are no longer required.
 	 */
-	public static function guessDomain()
-	{
-		if (isset($_SERVER['SERVER_NAME']))
-			return $_SERVER['SERVER_NAME'];
-		else if (isset($_SERVER['HTTP_HOST']))
-			return $_SERVER['HTTP_HOST'];
-
-		// nothing found, return default
-		return $this->_default_domain;
-	}
+	public static function guessDomain(){}
 
 	/**
 	 * Returns the collection of API keys
 	 * @return CMap
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as API Keys are no longer required.
 	 */
 	public function getAPIKeys()
 	{
-		return $this->api_keys;
+		return new CMap();
 	}
 
 	/**
@@ -152,14 +108,10 @@ class EGMapClient
 	 * @param CMap $api_keys
 	 * @return false if $api_keys is not of class CMap
 	 * @author Antonio Ramirez Cobos
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as API Keys are no longer required.
 	 */
-	public function setAPIKeys($api_keys)
-	{
-		if (!$api_keys instanceof CMap)
-			return false;
-
-		$this->api_keys = $api_keys;
-	}
+	public function setAPIKeys($api_keys){}
 
 	/**
 	 *
@@ -168,11 +120,10 @@ class EGMapClient
 	 * current is of default: {api}&output={format}&key={key}&q={address}
 	 * @param string $template
 	 * @author Antonio Ramirez Cobos
+	 * @deprecated
+	 * @since 2011-04-21 Matt Cheale Deprecated as latest code is not making any use of this.
 	 */
-	public function setGeoCodingTemplate($template)
-	{
-		$this->geoCodingInfotemplate = $template;
-	}
+	public function setGeoCodingTemplate($template){}
 
 	/**
 	 *
@@ -185,24 +136,51 @@ class EGMapClient
 	 * @since 2010-12-21
 	 *
 	 * @param string $address
-	 * @param string $format 'csv' or 'xml'
+	 * @param string $format 'csv' or 'xml' or 'json'
 	 * @return string
 	 * @author fabriceb
 	 * @since 2009-06-17
 	 * @since 2010-12-22 cUrl and Yii adaptation Antonio Ramirez
+	 * @since 2011-04-21 Matt Cheale Updated to API V3 and moved HTTP call to another function.
 	 *
 	 */
-	public function getGeocodingInfo($address, $format = 'csv')
+	public function getGeocodingInfo($address, $format = 'json')
 	{
+		$apiURL = self::API_URL . $format . '?address=' . urlencode($address) . '&sensor=false';
+		return $this->callApi($apiURL);
+	}
 
-		$apiUrl = str_replace(
-			array('{api}','{format}','{key}','{address}'),
-			array(self::API_URL, $format, $this->getAPIKey(), urlencode($address)),
-			$this->geoCodingInfotemplate);
-
+	/**
+	 * Reverse geocoding info
+	 *
+	 * @return string
+	 * @author Vincent Guillon <vincentg@theodo.fr>
+	 * @since 2010-03-04
+	 * @since 2010-12-22 modified by Antonio Ramirez (CUrl call)
+	 * @since 2011-03-23 Matt Cheale Updated the query string to use v3 API variables.
+	 * @since 2011-04-21 Matt Cheale Added format option and moved HTTP call to another function.
+	 */
+	public function getReverseGeocodingInfo($lat, $lng, $format = 'json')
+	{
+		$apiURL = self::API_URL . $format . '?latlng=' . $lat . ',' . $lng . '&sensor=false';
+		return $this->callApi($apiURL);
+	}
+	/**
+	 * Takes the $apiURL and performs that HTTP request to Google, returning the
+	 * raw data.
+	 *
+	 * @param string $apiURL
+	 * @return string
+	 * @author Matt Cheale
+	 * @since 2011-04-21
+	 * @since 2011-12-17 Modified to fix open_basedir restrictions
+	 */
+	private function callApi($apiUrl)
+	{
 		if (function_exists('curl_version'))
 		{
 			$ch = curl_init();
+
 			curl_setopt($ch, CURLOPT_URL, $apiUrl);
 			curl_setopt($ch, CURLOPT_HEADER, 0);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -216,33 +194,6 @@ class EGMapClient
 		return $raw_data;
 	}
 
-	/**
-	 * Reverse geocoding info
-	 *
-	 * @return string
-	 * @author Vincent Guillon <vincentg@theodo.fr>
-	 * @since 2010-03-04
-	 * @since 2010-12-22 modified by Antonio Ramirez (CUrl call)
-	 */
-	public function getReverseGeocodingInfo($lat, $lng)
-	{
-		$apiURL = self::API_URL . 'll=' . $lat . ',' . $lng;
-		if (function_exists('curl_version'))
-		{
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $apiUrl);
-			curl_setopt($ch, CURLOPT_HEADER, 0);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
-			$raw_data = $this->_curl_exec_follow($ch);
-			curl_close($ch);
-		}
-		else // no CUrl, try differently
-			$raw_data = file_get_contents($apiURL);
-
-		return $raw_data;
-	}
-	
 	/**
 	 * This function handles redirections with CURL if safe_mode or open_basedir 
 	 * is enabled. 
@@ -303,7 +254,4 @@ class EGMapClient
 		return curl_exec($ch);
 	}
 
-
 }
-
-?>
