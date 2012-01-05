@@ -29,9 +29,11 @@ $assets = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'assets';
 
 Yii::setPathOfAlias('scriptboostjs', $assets . DIRECTORY_SEPARATOR . 'js');
 Yii::setPathOfAlias('scriptboostcss', $assets . DIRECTORY_SEPARATOR . 'css');
+Yii::setPathOfAlias('scriptboosthtml', $assets . DIRECTORY_SEPARATOR . 'html');
 
 Yii::import('scriptboostjs.*');
 Yii::import('scriptboostcss.*');
+Yii::import('scriptboosthtml.HTMLMin');
 
 class EScriptBoost extends CComponent {
 
@@ -116,6 +118,18 @@ class EScriptBoost extends CComponent {
 			return call_user_func_array(array($adapter, 'minify'), array($content));
 		}
 		return false;
+	}
+	
+	/**
+	 * 
+	 * @param string $content the content to parse
+	 * @param array $options 
+	 * @see HTMLMin class to check the options
+	 * @return minified content
+	 */
+	public static function minifyHTML($content, $options = array())
+	{
+		return HTMLMin::minify($content, $options);
 	}
 	
 	/**
