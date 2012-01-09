@@ -39,113 +39,142 @@
  * @category  Yii
  * @package   EUri
  */
-abstract class EUri
-{
-    /**
-     * Scheme of this URI (http, ftp, etc.)
-     *
-     * @var string
-     */
-    protected $_scheme = '';
+abstract class EUri {
 
-    /**
-     * Return a string representation of this URI.
-     *
-     * @see    getUri()
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getUri();
-    }
+	/**
+	 * Scheme of this URI (http, ftp, etc.)
+	 *
+	 * @var string
+	 */
+	protected $_scheme = '';
 
-    /**
-     * Convenience function, checks that a $uri string is well-formed
-     * by validating it but not returning an object.  Returns TRUE if
-     * $uri is a well-formed URI, or FALSE otherwise.
-     *
-     * @param  string $uri The URI to check
-     * @return boolean
-     */
-    public static function check($uri)
-    {
-        try {
-            $uri = self::factory($uri);
-        } catch (Exception $e) {
-            return false;
-        }
+	/**
+	 * Return a string representation of this URI.
+	 *
+	 * @see    getUri()
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->getUri();
+	}
 
-        return $uri->valid();
-    }
+	/**
+	 * Convenience function, checks that a $uri string is well-formed
+	 * by validating it but not returning an object.  Returns TRUE if
+	 * $uri is a well-formed URI, or FALSE otherwise.
+	 *
+	 * @param  string $uri The URI to check
+	 * @return boolean
+	 */
+	public static function check($uri)
+	{
+		try
+		{
+			$uri = self::factory($uri);
+		} catch (Exception $e)
+		{
+			return false;
+		}
 
-    /**
-     * Create a new EUri object for a URI.  If building a new URI, then $uri should contain
-     * only the scheme (http, ftp, etc).  Otherwise, supply $uri with the complete URI.
-     *
-     * @param  string $uri The URI form which a EUri instance is created
-     * @throws CException When an empty string was supplied for the scheme
-     * @throws CException When an illegal scheme is supplied
-     * @throws CException When the scheme is not supported
-     * @return EUri
-     * @link   http://www.faqs.org/rfcs/rfc2396.html
-     */
-    public static function factory($uri = 'http')
-    {
-        // Separate the scheme from the scheme-specific parts
-        $uri            = explode(':', $uri, 2);
-        $scheme         = strtolower($uri[0]);
-        $schemeSpecific = isset($uri[1]) === true ? $uri[1] : '';
+		return $uri->valid();
+	}
 
-        if (strlen($scheme) === 0) {
-            throw new CException('An empty string was supplied for the scheme');
-        }
+	/**
+	 * Create a new EUri object for a URI.  If building a new URI, then $uri should contain
+	 * only the scheme (http, ftp, etc).  Otherwise, supply $uri with the complete URI.
+	 *
+	 * @param  string $uri The URI form which a EUri instance is created
+	 * @throws CException When an empty string was supplied for the scheme
+	 * @throws CException When an illegal scheme is supplied
+	 * @throws CException When the scheme is not supported
+	 * @return EUri
+	 * @link   http://www.faqs.org/rfcs/rfc2396.html
+	 */
+	public static function factory($uri = 'http')
+	{
+		// Separate the scheme from the scheme-specific parts
+		$uri = explode(':', $uri, 2);
+		$scheme = strtolower($uri[0]);
+		$schemeSpecific = isset($uri[1]) === true ? $uri[1] : '';
 
-        // Security check: $scheme is used to load a class file, so only alphanumerics are allowed.
-        if (ctype_alnum($scheme) === false) {
-            throw new CException('Illegal scheme supplied, only alphanumeric characters are permitted');
-        }
+		if (strlen($scheme) === 0)
+		{
+			throw new CException('An empty string was supplied for the scheme');
+		}
 
-        /**
-         * Create a new EUri object for the $uri. If a subclass of EUri exists for the
-         * scheme, return an instance of that class. Otherwise, a CException is thrown.
-         */
-        switch ($scheme) {
-            case 'http':
-                // Break intentionally omitted
-            case 'https':
-                $className = 'EUriHttp';
-                break;
-                
-            case 'mailto':
-                // TODO
-                
-            default:
-                
-                throw new CException("Scheme \"$scheme\" is not supported");
-                break;
-        }
-        
-        $schemeHandler = new $className($scheme, $schemeSpecific);
+		// Security check: $scheme is used to load a class file, so only alphanumerics are allowed.
+		if (ctype_alnum($scheme) === false)
+		{
+			throw new CException('Illegal scheme supplied, only alphanumeric characters are permitted');
+		}
 
-        return $schemeHandler;
-    }
+		/**
+		 * Create a new EUri object for the $uri. If a subclass of EUri exists for the
+		 * scheme, return an instance of that class. Otherwise, a CException is thrown.
+		 */
+		switch ($scheme)
+		{
+			case 'http':
+			// Break intentionally omitted
+			case 'https':
+				$className = 'EUriHttp';
+				break;
 
-    /**
-     * Get the URI's scheme
-     *
-     * @return string|false Scheme or false if no scheme is set.
-     */
-    public function getScheme()
-    {
-        if (empty($this->_scheme) === false) {
-            return $this->_scheme;
-        } else {
-            return false;
-        }
-    }
+			case 'mailto':
+			// TODO
 
-    /**
-     * EUri and its subclasses cannot be instantiated directly.
+			default:
+
+				throw new CException("Scheme \"$scheme\" is not supported");
+				break;
+		}
+
+		$schemeHandler = new $className($scheme, $schemeSpecific);
+
+		return $schemeHandler;
+	}
+
+	/**
+	 * Get the URI's scheme
+	 *
+	 * @return string|false Scheme or false if no scheme is set.
+	 */
+	public function getScheme()
+	{
+		if (empty($this->_scheme) === false)
+		{
+			return $this->_scheme;
+		} else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * EUri and its subclasses cannot be instantiated directly.
+	 * Use EUri::factory() to return a new EUri object.
+	 *
+	 * @param string $scheme         The scheme of the URI
+	 * @param string $schemeSpecific The scheme-specific part of the URI
+	 */
+	abstract protected function __construct($scheme, $schemeSpecific = '');
+
+	/**
+	 * Return a string representation of this URI.
+	 *
+	 * @return string
+	 */
+	abstract public function getUri();
+
+	/**
+	 * Returns TRUE if this URI is valid, or FALSE otherwise.
+	 *
+	 * @return boolean
+	 */
+	abstract public function valid();
+}
+ted directly.
      * Use EUri::factory() to return a new EUri object.
      *
      * @param string $scheme         The scheme of the URI

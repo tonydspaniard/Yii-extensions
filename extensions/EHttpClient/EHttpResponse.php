@@ -41,7 +41,6 @@
  * @category Yii
  * @package    EHttpClient
  * @subpackage EHttpResponse
-
  */
 class EHttpResponse
 {
@@ -629,3 +628,4 @@ class EHttpResponse
         return new EHttpResponse($code, $headers, $body, $version, $message);
     }
 }
+

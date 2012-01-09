@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Modified version of Zend_Http_Client_Adapter Interface of Zend for easy integration
  * with Yii as extension.
@@ -42,46 +43,46 @@
  * @package    EHttp
  * @subpackage Client_Adapter
  */
-interface EHttpClientAdapterInterface
-{
-    /**
-     * Set the configuration array for the adapter
-     *
-     * @param array $config
-     */
-    public function setConfig($config = array());
+interface EHttpClientAdapterInterface {
 
-    /**
-     * Connect to the remote server
-     *
-     * @param string  $host
-     * @param int     $port
-     * @param boolean $secure
-     */
-    public function connect($host, $port = 80, $secure = false);
+	/**
+	 * Set the configuration array for the adapter
+	 *
+	 * @param array $config
+	 */
+	public function setConfig($config = array());
 
-    /**
-     * Send request to the remote server
-     *
-     * @param string        $method
-     * @param EUriHttp 		$url
-     * @param string        $http_ver
-     * @param array         $headers
-     * @param string        $body
-     * @return string Request as text
-     */
-    public function write($method, $url, $http_ver = '1.1', $headers = array(), $body = '');
+	/**
+	 * Connect to the remote server
+	 *
+	 * @param string  $host
+	 * @param int     $port
+	 * @param boolean $secure
+	 */
+	public function connect($host, $port = 80, $secure = false);
 
-    /**
-     * Read response from server
-     *
-     * @return string
-     */
-    public function read();
+	/**
+	 * Send request to the remote server
+	 *
+	 * @param string        $method
+	 * @param EUriHttp 		$url
+	 * @param string        $http_ver
+	 * @param array         $headers
+	 * @param string        $body
+	 * @return string Request as text
+	 */
+	public function write($method, $url, $http_ver = '1.1', $headers = array(), $body = '');
 
-    /**
-     * Close the connection to the server
-     *
-     */
-    public function close();
+	/**
+	 * Read response from server
+	 *
+	 * @return string
+	 */
+	public function read();
+
+	/**
+	 * Close the connection to the server
+	 *
+	 */
+	public function close();
 }

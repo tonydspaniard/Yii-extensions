@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Modified version of Zend_Http_Cookie of Zend for easy integration
  * with Yii as extension.
@@ -49,287 +50,390 @@
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com/)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class EHttpCookie
-{
-    /**
-     * EHttpCookie name
-     *
-     * @var string
-     */
-    protected $name;
+class EHttpCookie {
 
-    /**
-     * EHttpCookie value
-     *
-     * @var string
-     */
-    protected $value;
+	/**
+	 * EHttpCookie name
+	 *
+	 * @var string
+	 */
+	protected $name;
 
-    /**
-     * EHttpCookie expiry date
-     *
-     * @var int
-     */
-    protected $expires;
+	/**
+	 * EHttpCookie value
+	 *
+	 * @var string
+	 */
+	protected $value;
 
-    /**
-     * EHttpCookie domain
-     *
-     * @var string
-     */
-    protected $domain;
+	/**
+	 * EHttpCookie expiry date
+	 *
+	 * @var int
+	 */
+	protected $expires;
 
-    /**
-     * EHttpCookie path
-     *
-     * @var string
-     */
-    protected $path;
+	/**
+	 * EHttpCookie domain
+	 *
+	 * @var string
+	 */
+	protected $domain;
 
-    /**
-     * Whether the cookie is secure or not
-     *
-     * @var boolean
-     */
-    protected $secure;
+	/**
+	 * EHttpCookie path
+	 *
+	 * @var string
+	 */
+	protected $path;
 
-    /**
-     * EHttpCookie object constructor
-     *
-     * @todo Add validation of each one of the parameters (legal domain, etc.)
-     *
-     * @param string $name
-     * @param string $value
-     * @param int $expires
-     * @param string $domain
-     * @param string $path
-     * @param bool $secure
-     */
-    public function __construct($name, $value, $domain, $expires = null, $path = null, $secure = false)
-    {
-        if (preg_match("/[=,; \t\r\n\013\014]/", $name)) {
-       
-            throw new CException("Cookie name cannot contain these characters: =,; \\t\\r\\n\\013\\014 ({$name})");
-        }
+	/**
+	 * Whether the cookie is secure or not
+	 *
+	 * @var boolean
+	 */
+	protected $secure;
 
-        if (! $this->name = (string) $name) {
-            throw new CException('Cookies must have a name');
-        }
+	/**
+	 * Whether the cookie value has been encoded/decoded
+	 *
+	 * @var boolean
+	 */
+	protected $encodeValue;
 
-        if (! $this->domain = (string) $domain) {
-            throw new CException('Cookies must have a domain');
-        }
+	/**
+	 * EHttpCookie object constructor
+	 *
+	 * @todo Add validation of each one of the parameters (legal domain, etc.)
+	 *
+	 * @param string $name
+	 * @param string $value
+	 * @param int $expires
+	 * @param string $domain
+	 * @param string $path
+	 * @param bool $secure
+	 */
+	public function __construct($name, $value, $domain, $expires = null, $path = null, $secure = false)
+	{
+		if (preg_match("/[=,; \t\r\n\013\014]/", $name))
+		{
 
-        $this->value = (string) $value;
-        $this->expires = ($expires === null ? null : (int) $expires);
-        $this->path = ($path ? $path : '/');
-        $this->secure = $secure;
-    }
+			throw new CException("Cookie name cannot contain these characters: =,; \\t\\r\\n\\013\\014 ({$name})");
+		}
 
-    /**
-     * Get EHttpCookie name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+		if (!$this->name = (string) $name)
+		{
+			throw new CException('Cookies must have a name');
+		}
 
-    /**
-     * Get cookie value
-     *
-     * @return string
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
+		if (!$this->domain = (string) $domain)
+		{
+			throw new CException('Cookies must have a domain');
+		}
 
-    /**
-     * Get cookie domain
-     *
-     * @return string
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
+		$this->value = (string) $value;
+		$this->expires = ($expires === null ? null : (int) $expires);
+		$this->path = ($path ? $path : '/');
+		$this->secure = $secure;
+	}
 
-    /**
-     * Get the cookie path
-     *
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
+	/**
+	 * Get EHttpCookie name
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
 
-    /**
-     * Get the expiry time of the cookie, or null if no expiry time is set
-     *
-     * @return int|null
-     */
-    public function getExpiryTime()
-    {
-        return $this->expires;
-    }
+	/**
+	 * Get cookie value
+	 *
+	 * @return string
+	 */
+	public function getValue()
+	{
+		return $this->value;
+	}
 
-    /**
-     * Check whether the cookie should only be sent over secure connections
-     *
-     * @return boolean
-     */
-    public function isSecure()
-    {
-        return $this->secure;
-    }
+	/**
+	 * Get cookie domain
+	 *
+	 * @return string
+	 */
+	public function getDomain()
+	{
+		return $this->domain;
+	}
 
-    /**
-     * Check whether the cookie has expired
-     *
-     * Always returns false if the cookie is a session cookie (has no expiry time)
-     *
-     * @param int $now Timestamp to consider as "now"
-     * @return boolean
-     */
-    public function isExpired($now = null)
-    {
-        if ($now === null) $now = time();
-        if (is_int($this->expires) && $this->expires < $now) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+	/**
+	 * Get the cookie path
+	 *
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return $this->path;
+	}
 
-    /**
-     * Check whether the cookie is a session cookie (has no expiry time set)
-     *
-     * @return boolean
-     */
-    public function isSessionCookie()
-    {
-        return ($this->expires === null);
-    }
+	/**
+	 * Get the expiry time of the cookie, or null if no expiry time is set
+	 *
+	 * @return int|null
+	 */
+	public function getExpiryTime()
+	{
+		return $this->expires;
+	}
 
-    /**
-     * Checks whether the cookie should be sent or not in a specific scenario
-     *
-     * @param string|EUriHttp $uri URI to check against (secure, domain, path)
-     * @param boolean $matchSessionCookies Whether to send session cookies
-     * @param int $now Override the current time when checking for expiry time
-     * @return boolean
-     */
-    public function match($uri, $matchSessionCookies = true, $now = null)
-    {
-        if (is_string ($uri)) {
-            $uri = EUriHttp::factory($uri);
-        }
+	/**
+	 * Check whether the cookie should only be sent over secure connections
+	 *
+	 * @return boolean
+	 */
+	public function isSecure()
+	{
+		return $this->secure;
+	}
 
-        // Make sure we have a valid EUriHttp object
-        if (! ($uri->valid() && ($uri->getScheme() == 'http' || $uri->getScheme() =='https'))) {
-    
-            throw new CException('Passed URI is not a valid HTTP or HTTPS URI');
-        }
+	/**
+	 * Check whether the cookie has expired
+	 *
+	 * Always returns false if the cookie is a session cookie (has no expiry time)
+	 *
+	 * @param int $now Timestamp to consider as "now"
+	 * @return boolean
+	 */
+	public function isExpired($now = null)
+	{
+		if ($now === null)
+			$now = time();
+		if (is_int($this->expires) && $this->expires < $now)
+		{
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
 
-        // Check that the cookie is secure (if required) and not expired
-        if ($this->secure && $uri->getScheme() != 'https') return false;
-        if ($this->isExpired($now)) return false;
-        if ($this->isSessionCookie() && ! $matchSessionCookies) return false;
+	/**
+	 * Check whether the cookie is a session cookie (has no expiry time set)
+	 *
+	 * @return boolean
+	 */
+	public function isSessionCookie()
+	{
+		return ($this->expires === null);
+	}
 
-        // Validate domain and path
-        // Domain is validated using tail match, while path is validated using head match
-        $domain_preg = preg_quote($this->getDomain(), "/");
-        if (! preg_match("/{$domain_preg}$/", $uri->getHost())) return false;
-        $path_preg = preg_quote($this->getPath(), "/");
-        if (! preg_match("/^{$path_preg}/", $uri->getPath())) return false;
+	/**
+	 * Checks whether the cookie should be sent or not in a specific scenario
+	 *
+	 * @param string|EUriHttp $uri URI to check against (secure, domain, path)
+	 * @param boolean $matchSessionCookies Whether to send session cookies
+	 * @param int $now Override the current time when checking for expiry time
+	 * @return boolean
+	 */
+	public function match($uri, $matchSessionCookies = true, $now = null)
+	{
+		if (is_string($uri))
+		{
+			$uri = EUriHttp::factory($uri);
+		}
 
-        // If we didn't die until now, return true.
-        return true;
-    }
+		// Make sure we have a valid EUriHttp object
+		if (!($uri->valid() && ($uri->getScheme() == 'http' || $uri->getScheme() == 'https')))
+		{
 
-    /**
-     * Get the cookie as a string, suitable for sending as a "EHttpCookie" header in an
-     * HTTP request
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->name . '=' . urlencode($this->value) . ';';
-    }
+			throw new CException('Passed URI is not a valid HTTP or HTTPS URI');
+		}
 
-    /**
-     * Generate a new EHttpCookie object from a cookie string
-     * (for example the value of the Set-EHttpCookie HTTP header)
-     *
-     * @param string $cookieStr
-     * @param EUriHttp|string $ref_uri Reference URI for default values (domain, path)
-     * @return EHttpCookie A new EHttpCookie object or false on failure.
-     */
-    public static function fromString($cookieStr, $ref_uri = null)
-    {
-        // Set default values
-        if (is_string($ref_uri)) {
-            $ref_uri = EUriHttp::factory($ref_uri);
-        }
+		// Check that the cookie is secure (if required) and not expired
+		if ($this->secure && $uri->getScheme() != 'https')
+			return false;
+		if ($this->isExpired($now))
+			return false;
+		if ($this->isSessionCookie() && !$matchSessionCookies)
+			return false;
 
-        $name    = '';
-        $value   = '';
-        $domain  = '';
-        $path    = '';
-        $expires = null;
-        $secure  = false;
-        $parts   = explode(';', $cookieStr);
+		// Check if the domain matches
+		if (!self::matchCookieDomain($this->getDomain(), $uri->getHost()))
+		{
+			return false;
+		}
 
-        // If first part does not include '=', fail
-        if (strpos($parts[0], '=') === false) return false;
+		// Check that path matches using prefix match
+		if (!self::matchCookiePath($this->getPath(), $uri->getPath()))
+		{
+			return false;
+		}
 
-        // Get the name and value of the cookie
-        list($name, $value) = explode('=', trim(array_shift($parts)), 2);
-        $name  = trim($name);
-        $value = urldecode(trim($value));
+		// If we didn't die until now, return true.
+		return true;
+	}
 
-        // Set default domain and path
-        if ($ref_uri instanceof EUriHttp) {
-            $domain = $ref_uri->getHost();
-            $path = $ref_uri->getPath();
-            $path = substr($path, 0, strrpos($path, '/'));
-        }
+	/**
+	 * Get the cookie as a string, suitable for sending as a "EHttpCookie" header in an
+	 * HTTP request
+	 *
+	 * @return string
+	 */
+	public function __toString()
+	{
+		if ($this->encodeValue)
+		{
+			return $this->name . '=' . urlencode($this->value) . ';';
+		}
+		return $this->name . '=' . urlencode($this->value) . ';';
+	}
 
-        // Set other cookie parameters
-        foreach ($parts as $part) {
-            $part = trim($part);
-            if (strtolower($part) == 'secure') {
-                $secure = true;
-                continue;
-            }
+	/**
+	 * Generate a new EHttpCookie object from a cookie string
+	 * (for example the value of the Set-EHttpCookie HTTP header)
+	 *
+	 * @param string $cookieStr
+	 * @param EUriHttp|string $ref_uri Reference URI for default values (domain, path)
+	 * @return EHttpCookie A new EHttpCookie object or false on failure.
+	 */
+	public static function fromString($cookieStr, $ref_uri = null)
+	{
+		// Set default values
+		if (is_string($ref_uri))
+		{
+			$ref_uri = EUriHttp::factory($ref_uri);
+		}
 
-            $keyValue = explode('=', $part, 2);
-            if (count($keyValue) == 2) {
-                list($k, $v) = $keyValue;
-                switch (strtolower($k))    {
-                    case 'expires':
-                        $expires = strtotime($v);
-                        break;
-                    case 'path':
-                        $path = $v;
-                        break;
-                    case 'domain':
-                        $domain = $v;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
+		$name = '';
+		$value = '';
+		$domain = '';
+		$path = '';
+		$expires = null;
+		$secure = false;
+		$parts = explode(';', $cookieStr);
 
-        if ($name !== '') {
-            return new EHttpCookie($name, $value, $domain, $expires, $path, $secure);
-        } else {
-            return false;
-        }
-    }
+		// If first part does not include '=', fail
+		if (strpos($parts[0], '=') === false)
+			return false;
+
+		// Get the name and value of the cookie
+		list($name, $value) = explode('=', trim(array_shift($parts)), 2);
+		$name = trim($name);
+		if ($encodeValue)
+			$value = urldecode(trim($value));
+
+		// Set default domain and path
+		if ($ref_uri instanceof EUriHttp)
+		{
+			$domain = $ref_uri->getHost();
+			$path = $ref_uri->getPath();
+			$path = substr($path, 0, strrpos($path, '/'));
+		}
+
+		// Set other cookie parameters
+		foreach ($parts as $part)
+		{
+			$part = trim($part);
+			if (strtolower($part) == 'secure')
+			{
+				$secure = true;
+				continue;
+			}
+
+			$keyValue = explode('=', $part, 2);
+			if (count($keyValue) == 2)
+			{
+				list($k, $v) = $keyValue;
+				switch (strtolower($k))
+				{
+					case 'expires':
+						/**
+						 * todo: the expiration date is past Tue, 19 Jan 2038 03:14:07 UTC
+						 * 	 find a workaround. 
+						 */
+						$expires = strtotime($v);
+						break;
+					case 'path':
+						$path = $v;
+						break;
+					case 'domain':
+						$domain = $v;
+						break;
+					default:
+						break;
+				}
+			}
+		}
+
+		if ($name !== '')
+		{
+			$ret = new EHttpCookie($name, $value, $domain, $expires, $path, $secure);
+			$ret->encodeValue = ($encodeValue) ? true : false;
+			return $ret;
+		} else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Check if a cookie's domain matches a host name.
+	 *
+	 * Used by EHttpCookie and EHttpCookieJar for cookie matching
+	 *
+	 * @param  string $cookieDomain
+	 * @param  string $host
+	 *
+	 * @return boolean
+	 */
+	public static function matchCookieDomain($cookieDomain, $host)
+	{
+		if (!$cookieDomain)
+		{
+			throw new EHttpException("\$cookieDomain is expected to be a cookie domain");
+		}
+
+		if (!$host)
+		{
+			throw new EHttpException("\$host is expected to be a host name");
+		}
+
+		$cookieDomain = strtolower($cookieDomain);
+		$host = strtolower($host);
+
+		if ($cookieDomain[0] == '.')
+		{
+			$cookieDomain = substr($cookieDomain, 1);
+		}
+
+		// Check for either exact match or suffix match
+		return ($cookieDomain == $host ||
+			preg_match('/\.' . preg_quote($cookieDomain) . '$/', $host));
+	}
+
+	/**
+	 * Check if a cookie's path matches a URL path
+	 *
+	 * Used by EHttpCookie and EHttpCookieJar for cookie matching
+	 *
+	 * @param  string $cookiePath
+	 * @param  string $path
+	 * @return boolean
+	 */
+	public static function matchCookiePath($cookiePath, $path)
+	{
+		if (!$cookiePath)
+		{
+			throw new EHttpException("\$cookiePath is expected to be a cookie path");
+		}
+
+		if (!$path)
+		{
+			throw new EHttpException("\$path is expected to be a host name");
+		}
+
+		return (strpos($path, $cookiePath) === 0);
+	}
+
 }

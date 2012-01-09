@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Modified version of CookieJar of Zend for easy integration
  * with Yii as extension.
@@ -54,278 +55,383 @@
  * @package    EHttpClient
  * @subpackage ECookieJar
  */
-class ECookieJar
-{
-    /**
-     * Return cookie(s) as a EHttpCookieJar object
-     *
-     */
-    const COOKIE_OBJECT = 0;
+class ECookieJar {
+	/**
+	 * Return cookie(s) as a EHttpCookieJar object
+	 *
+	 */
+	const COOKIE_OBJECT = 0;
 
-    /**
-     * Return cookie(s) as a string (suitable for sending in an HTTP request)
-     *
-     */
-    const COOKIE_STRING_ARRAY = 1;
+	/**
+	 * Return cookie(s) as a string (suitable for sending in an HTTP request)
+	 *
+	 */
+	const COOKIE_STRING_ARRAY = 1;
 
-    /**
-     * Return all cookies as one long string (suitable for sending in an HTTP request)
-     *
-     */
-    const COOKIE_STRING_CONCAT = 2;
+	/**
+	 * Return all cookies as one long string (suitable for sending in an HTTP request)
+	 *
+	 */
+	const COOKIE_STRING_CONCAT = 2;
 
-    /**
-     * Array storing cookies
-     *
-     * Cookies are stored according to domain and path:
-     * $cookies
-     *  + www.mydomain.com
-     *    + /
-     *      - cookie1
-     *      - cookie2
-     *    + /somepath
-     *      - othercookie
-     *  + www.otherdomain.net
-     *    + /
-     *      - alsocookie
-     *
-     * @var array
-     */
-    protected $cookies = array();
+	/**
+	 * Array storing cookies
+	 *
+	 * Cookies are stored according to domain and path:
+	 * $cookies
+	 *  + www.mydomain.com
+	 *    + /
+	 *      - cookie1
+	 *      - cookie2
+	 *    + /somepath
+	 *      - othercookie
+	 *  + www.otherdomain.net
+	 *    + /
+	 *      - alsocookie
+	 *
+	 * @var array
+	 */
+	protected $cookies = array();
 
-    /**
-     * Construct a new ECookieJar object
-     *
-     */
-    public function __construct()
-    { }
+	/**
+	 * The Zend_Http_Cookie array
+	 *
+	 * @var array
+	 */
+	protected $_rawCookies = array();
 
-    /**
-     * Add a cookie to the jar. Cookie should be passed either as a EHttpCookieJar object
-     * or as a string - in which case an object is created from the string.
-     *
-     * @param EHttpCookieJar|string $cookie
-     * @param EUriHttp|string    $ref_uri Optional reference URI (for domain, path, secure)
-     */
-    public function addCookie($cookie, $ref_uri = null)
-    {
-        if (is_string($cookie)) {
-            $cookie = EHttpCookie::fromString($cookie, $ref_uri);
-        }
+	/**
+	 * Construct a new ECookieJar object
+	 *
+	 */
+	public function __construct()
+	{
+		
+	}
 
-        if ($cookie instanceof EHttpCookie) {
-            $domain = $cookie->getDomain();
-            $path = $cookie->getPath();
-            if (! isset($this->cookies[$domain])) $this->cookies[$domain] = array();
-            if (! isset($this->cookies[$domain][$path])) $this->cookies[$domain][$path] = array();
-            $this->cookies[$domain][$path][$cookie->getName()] = $cookie;
-        } else {
-           
-            throw new CException('Supplient argument is not a valid cookie string or object');
-        }
-    }
+	/**
+	 * Add a cookie to the jar. Cookie should be passed either as a EHttpCookieJar object
+	 * or as a string - in which case an object is created from the string.
+	 *
+	 * @param EHttpCookieJar|string $cookie
+	 * @param EUriHttp|string    $ref_uri Optional reference URI (for domain, path, secure)
+	 */
+	public function addCookie($cookie, $ref_uri = null, $encodeValue = true)
+	{
+		if (is_string($cookie))
+		{
+			$cookie = EHttpCookie::fromString($cookie, $ref_uri, $encodeValue);
+		}
 
-    /**
-     * Parse an HTTP response, adding all the cookies set in that response
-     * to the cookie jar.
-     *
-     * @param EHttpResponse $response
-     * @param EUriHttp|string $ref_uri Requested URI
-     */
-    public function addCookiesFromResponse($response, $ref_uri)
-    {
-        if (! $response instanceof EHttpResponse) {
-                 
-            throw new CException('$response is expected to be a Response object, ' .
-                gettype($response) . ' was passed');
-        }
+		if ($cookie instanceof EHttpCookie)
+		{
+			$domain = $cookie->getDomain();
+			$path = $cookie->getPath();
+			if (!isset($this->cookies[$domain]))
+				$this->cookies[$domain] = array();
+			if (!isset($this->cookies[$domain][$path]))
+				$this->cookies[$domain][$path] = array();
+			$this->cookies[$domain][$path][$cookie->getName()] = $cookie;
+			$this->_rawCookies[] = $cookie;
+		} else
+		{
 
-        $cookie_hdrs = $response->getHeader('Set-Cookie');
+			throw new EHttpClientException('Supplient argument is not a valid cookie string or object');
+		}
+	}
 
-        if (is_array($cookie_hdrs)) {
-            foreach ($cookie_hdrs as $cookie) {
-                $this->addCookie($cookie, $ref_uri);
-            }
-        } elseif (is_string($cookie_hdrs)) {
-            $this->addCookie($cookie_hdrs, $ref_uri);
-        }
-    }
+	/**
+	 * Parse an HTTP response, adding all the cookies set in that response
+	 * to the cookie jar.
+	 *
+	 * @param EHttpResponse $response
+	 * @param EUriHttp|string $ref_uri Requested URI
+	 */
+	public function addCookiesFromResponse($response, $ref_uri, $encodeValue = true)
+	{
+		if (!$response instanceof EHttpResponse)
+		{
 
-    /**
-     * Get all cookies in the cookie jar as an array
-     *
-     * @param int $ret_as Whether to return cookies as objects of EHttpCookieJar or as strings
-     * @return array|string
-     */
-    public function getAllCookies($ret_as = self::COOKIE_OBJECT)
-    {
-        $cookies = $this->_flattenCookiesArray($this->cookies, $ret_as);
-        return $cookies;
-    }
+			throw new CException('$response is expected to be a Response object, ' .
+				gettype($response) . ' was passed');
+		}
 
-    /**
-     * Return an array of all cookies matching a specific request according to the request URI,
-     * whether session cookies should be sent or not, and the time to consider as "now" when
-     * checking cookie expiry time.
-     *
-     * @param string|EUriHttp $uri URI to check against (secure, domain, path)
-     * @param boolean $matchSessionCookies Whether to send session cookies
-     * @param int $ret_as Whether to return cookies as objects of EHttpCookieJar or as strings
-     * @param int $now Override the current time when checking for expiry time
-     * @return array|string
-     */
-    public function getMatchingCookies($uri, $matchSessionCookies = true,
-        $ret_as = self::COOKIE_OBJECT, $now = null)
-    {
-        if (is_string($uri)) $uri = EUri::factory($uri);
-        if (! $uri instanceof EUriHttp) {
-            throw new CException("Invalid URI string or object passed");
-        }
+		$cookie_hdrs = $response->getHeader('Set-Cookie');
 
-        // Set path
-        $path = $uri->getPath();
-        $path = substr($path, 0, strrpos($path, '/'));
-        if (! $path) $path = '/';
+		if (is_array($cookie_hdrs))
+		{
+			foreach ($cookie_hdrs as $cookie)
+			{
+				$this->addCookie($cookie, $ref_uri, $encodeValue);
+			}
+		} elseif (is_string($cookie_hdrs))
+		{
+			$this->addCookie($cookie_hdrs, $ref_uri, $encodeValue);
+		}
+	}
 
-        // First, reduce the array of cookies to only those matching domain and path
-        $cookies = $this->_matchDomain($uri->getHost());
-        $cookies = $this->_matchPath($cookies, $path);
-        $cookies = $this->_flattenCookiesArray($cookies, self::COOKIE_OBJECT);
+	/**
+	 * Get all cookies in the cookie jar as an array
+	 *
+	 * @param int $ret_as Whether to return cookies as objects of EHttpCookieJar or as strings
+	 * @return array|string
+	 */
+	public function getAllCookies($ret_as = self::COOKIE_OBJECT)
+	{
+		$cookies = $this->_flattenCookiesArray($this->cookies, $ret_as);
+		return $cookies;
+	}
 
-        // Next, run Cookie->match on all cookies to check secure, time and session mathcing
-        $ret = array();
-        foreach ($cookies as $cookie)
-            if ($cookie->match($uri, $matchSessionCookies, $now))
-                $ret[] = $cookie;
+	/**
+	 * Return an array of all cookies matching a specific request according to the request URI,
+	 * whether session cookies should be sent or not, and the time to consider as "now" when
+	 * checking cookie expiry time.
+	 *
+	 * @param string|EUriHttp $uri URI to check against (secure, domain, path)
+	 * @param boolean $matchSessionCookies Whether to send session cookies
+	 * @param int $ret_as Whether to return cookies as objects of EHttpCookieJar or as strings
+	 * @param int $now Override the current time when checking for expiry time
+	 * @return array|string
+	 */
+	public function getMatchingCookies($uri, $matchSessionCookies = true, $ret_as = self::COOKIE_OBJECT, $now = null)
+	{
+		if (is_string($uri))
+			$uri = EUri::factory($uri);
+		if (!$uri instanceof EUriHttp)
+		{
+			throw new CException("Invalid URI string or object passed");
+		}
 
-        // Now, use self::_flattenCookiesArray again - only to convert to the return format ;)
-        $ret = $this->_flattenCookiesArray($ret, $ret_as);
+		// First, reduce the array of cookies to only those matching domain and path
+		$cookies = $this->_matchDomain($uri->getHost());
+		$cookies = $this->_matchPath($cookies, $uri->getPath());
+		$cookies = $this->_flattenCookiesArray($cookies, self::COOKIE_OBJECT);
 
-        return $ret;
-    }
+		// Next, run Cookie->match on all cookies to check secure, time and session mathcing
+		$ret = array();
+		foreach ($cookies as $cookie)
+			if ($cookie->match($uri, $matchSessionCookies, $now))
+				$ret[] = $cookie;
 
-    /**
-     * Get a specific cookie according to a URI and name
-     *
-     * @param EUriHttp|string $uri The uri (domain and path) to match
-     * @param string $cookie_name The cookie's name
-     * @param int $ret_as Whether to return cookies as objects of EHttpCookieJar or as strings
-     * @return EHttpCookieJar|string
-     */
-    public function getCookie($uri, $cookie_name, $ret_as = self::COOKIE_OBJECT)
-    {
-        if (is_string($uri)) {
-            $uri = EUri::factory($uri);
-        }
+		// Now, use self::_flattenCookiesArray again - only to convert to the return format ;)
+		$ret = $this->_flattenCookiesArray($ret, $ret_as);
 
-        if (! $uri instanceof EUriHttp) {
-            throw new CException('Invalid URI specified');
-        }
+		return $ret;
+	}
 
-        // Get correct cookie path
-        $path = $uri->getPath();
-        $path = substr($path, 0, strrpos($path, '/'));
-        if (! $path) $path = '/';
+	/**
+	 * Get a specific cookie according to a URI and name
+	 *
+	 * @param EUriHttp|string $uri The uri (domain and path) to match
+	 * @param string $cookie_name The cookie's name
+	 * @param int $ret_as Whether to return cookies as objects of EHttpCookieJar or as strings
+	 * @return EHttpCookieJar|string
+	 */
+	public function getCookie($uri, $cookie_name, $ret_as = self::COOKIE_OBJECT)
+	{
+		if (is_string($uri))
+		{
+			$uri = EUri::factory($uri);
+		}
 
-        if (isset($this->cookies[$uri->getHost()][$path][$cookie_name])) {
-            $cookie = $this->cookies[$uri->getHost()][$path][$cookie_name];
+		if (!$uri instanceof EUriHttp)
+		{
+			throw new CException('Invalid URI specified');
+		}
 
-            switch ($ret_as) {
-                case self::COOKIE_OBJECT:
-                    return $cookie;
-                    break;
+		// Get correct cookie path
+		$path = $uri->getPath();
+		$path = substr($path, 0, strrpos($path, '/'));
+		if (!$path)
+			$path = '/';
 
-                case self::COOKIE_STRING_ARRAY:
-                case self::COOKIE_STRING_CONCAT:
-                    return $cookie->__toString();
-                    break;
+		if (isset($this->cookies[$uri->getHost()][$path][$cookie_name]))
+		{
+			$cookie = $this->cookies[$uri->getHost()][$path][$cookie_name];
 
-                default:
-                    throw new CException("Invalid value passed for \$ret_as: {$ret_as}");
-                    break;
-            }
-        } else {
-            return false;
-        }
-    }
+			switch ($ret_as)
+			{
+				case self::COOKIE_OBJECT:
+					return $cookie;
+					break;
 
-    /**
-     * Helper function to recursivly flatten an array. Shoud be used when exporting the
-     * cookies array (or parts of it)
-     *
-     * @param EHttpCookieJar|array $ptr
-     * @param int $ret_as What value to return
-     * @return array|string
-     */
-    protected function _flattenCookiesArray($ptr, $ret_as = self::COOKIE_OBJECT) {
-        if (is_array($ptr)) {
-            $ret = ($ret_as == self::COOKIE_STRING_CONCAT ? '' : array());
-            foreach ($ptr as $item) {
-                if ($ret_as == self::COOKIE_STRING_CONCAT) {
-                    $ret .= $this->_flattenCookiesArray($item, $ret_as);
-                } else {
-                    $ret = array_merge($ret, $this->_flattenCookiesArray($item, $ret_as));
-                }
-            }
-            return $ret;
-        } elseif ($ptr instanceof EHttpCookie) {
-            switch ($ret_as) {
-                case self::COOKIE_STRING_ARRAY:
-                    return array($ptr->__toString());
-                    break;
+				case self::COOKIE_STRING_ARRAY:
+				case self::COOKIE_STRING_CONCAT:
+					return $cookie->__toString();
+					break;
 
-                case self::COOKIE_STRING_CONCAT:
-                    return $ptr->__toString();
-                    break;
+				default:
+					throw new CException("Invalid value passed for \$ret_as: {$ret_as}");
+					break;
+			}
+		} else
+		{
+			return false;
+		}
+	}
 
-                case self::COOKIE_OBJECT:
-                default:
-                    return array($ptr);
-                    break;
-            }
-        }
+	/**
+	 * Helper function to recursivly flatten an array. Shoud be used when exporting the
+	 * cookies array (or parts of it)
+	 *
+	 * @param EHttpCookieJar|array $ptr
+	 * @param int $ret_as What value to return
+	 * @return array|string
+	 */
+	protected function _flattenCookiesArray($ptr, $ret_as = self::COOKIE_OBJECT)
+	{
+		if (is_array($ptr))
+		{
+			$ret = ($ret_as == self::COOKIE_STRING_CONCAT ? '' : array());
+			foreach ($ptr as $item)
+			{
+				if ($ret_as == self::COOKIE_STRING_CONCAT)
+				{
+					$ret .= $this->_flattenCookiesArray($item, $ret_as);
+				} else
+				{
+					$ret = array_merge($ret, $this->_flattenCookiesArray($item, $ret_as));
+				}
+			}
+			return $ret;
+		} elseif ($ptr instanceof EHttpCookie)
+		{
+			switch ($ret_as)
+			{
+				case self::COOKIE_STRING_ARRAY:
+					return array($ptr->__toString());
+					break;
 
-        return null;
-    }
+				case self::COOKIE_STRING_CONCAT:
+					return $ptr->__toString();
+					break;
 
-    /**
-     * Return a subset of the cookies array matching a specific domain
-     *
-     * Returned array is actually an array of pointers to items in the $this->cookies array.
-     *
-     * @param string $domain
-     * @return array
-     */
-    protected function _matchDomain($domain) {
-        $ret = array();
+				case self::COOKIE_OBJECT:
+				default:
+					return array($ptr);
+					break;
+			}
+		}
 
-        foreach (array_keys($this->cookies) as $cdom) {
-            $regex = "/" . preg_quote($cdom, "/") . "$/i";
-            if (preg_match($regex, $domain)) $ret[$cdom] = &$this->cookies[$cdom];
-        }
+		return null;
+	}
 
-        return $ret;
-    }
+	/**
+	 * Return a subset of the cookies array matching a specific domain
+	 *
+	 * Returned array is actually an array of pointers to items in the $this->cookies array.
+	 *
+	 * @param string $domain
+	 * @return array
+	 */
+	protected function _matchDomain($domain)
+	{
+		$ret = array();
 
-    /**
-     * Return a subset of a domain-matching cookies that also match a specified path
-     *
-     * Returned array is actually an array of pointers to items in the $passed array.
-     *
-     * @param array $dom_array
-     * @param string $path
-     * @return array
-     */
-    protected function _matchPath($domains, $path) {
-        $ret = array();
-        if (substr($path, -1) != '/') $path .= '/';
+		foreach (array_keys($this->cookies) as $cdom)
+		{
+			if (EHttpCookie::matchCookieDomain($cdom, $domain))
+			{
+				$ret[$cdom] = &$this->cookies[$cdom];
+			}
+		}
 
-        foreach ($domains as $dom => $paths_array) {
-            foreach (array_keys($paths_array) as $cpath) {
-                $regex = "|^" . preg_quote($cpath, "|") . "|i";
-                if (preg_match($regex, $path)) {
-                    if (! isset($ret[$dom])) $ret[$dom] = array();
-                    $ret[$dom][$cpath] = &$paths_array[$cpath];
+		return $ret;
+	}
+
+	/**
+	 * Return a subset of a domain-matching cookies that also match a specified path
+	 *
+	 * Returned array is actually an array of pointers to items in the $passed array.
+	 *
+	 * @param array $dom_array
+	 * @param string $path
+	 * @return array
+	 */
+	protected function _matchPath($domains, $path)
+	{
+		$ret = array();
+
+		foreach ($domains as $dom => $paths_array)
+		{
+			foreach (array_keys($paths_array) as $cpath)
+			{
+				if (EHttpCookie::matchCookiePath($cpath, $path))
+				{
+					if (!isset($ret[$dom]))
+					{
+						$ret[$dom] = array();
+					}
+				}
+
+				$ret[$dom][$cpath] = $paths_array[$cpath];
+			}
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Create a new ECookieJar object and automatically load into it all the
+	 * cookies set in an Http_Response object. If $uri is set, it will be
+	 * considered as the requested URI for setting default domain and path
+	 * of the cookie.
+	 *
+	 * @param EHttpResponse $response HTTP Response object
+	 * @param EUriHttp|string $uri The requested URI
+	 * @return EHttpCookieJarJar
+	 * @todo Add the $uri functionality.
+	 */
+	public static function fromResponse(EHttpResponse $response, $ref_uri)
+	{
+		$jar = new self();
+		$jar->addCookiesFromResponse($response, $ref_uri);
+		return $jar;
+	}
+
+	/**
+	 * Required by Countable interface
+	 *
+	 * @return int
+	 */
+	public function count()
+	{
+		return count($this->_rawCookies);
+	}
+
+	/**
+	 * Required by IteratorAggregate interface
+	 *
+	 * @return ArrayIterator
+	 */
+	public function getIterator()
+	{
+		return new ArrayIterator($this->_rawCookies);
+	}
+
+	/**
+	 * Tells if the jar is empty of any cookie
+	 *
+	 * @return bool
+	 */
+	public function isEmpty()
+	{
+		return count($this) == 0;
+	}
+
+	/**
+	 * Empties the cookieJar of any cookie
+	 *
+	 * @return Zend_Http_CookieJar
+	 */
+	public function reset()
+	{
+		$this->cookies = $this->_rawCookies = array();
+		return $this;
+	}
+
+}
+dom][$cpath] = &$paths_array[$cpath];
                 }
             }
         }
