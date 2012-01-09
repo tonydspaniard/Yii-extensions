@@ -431,29 +431,3 @@ class ECookieJar {
 	}
 
 }
-dom][$cpath] = &$paths_array[$cpath];
-                }
-            }
-        }
-
-        return $ret;
-    }
-
-    /**
-     * Create a new ECookieJar object and automatically load into it all the
-     * cookies set in an Http_Response object. If $uri is set, it will be
-     * considered as the requested URI for setting default domain and path
-     * of the cookie.
-     *
-     * @param EHttpResponse $response HTTP Response object
-     * @param EUriHttp|string $uri The requested URI
-     * @return EHttpCookieJarJar
-     * @todo Add the $uri functionality.
-     */
-    public static function fromResponse(EHttpResponse $response, $ref_uri)
-    {
-        $jar = new self();
-        $jar->addCookiesFromResponse($response, $ref_uri);
-        return $jar;
-    }
-}

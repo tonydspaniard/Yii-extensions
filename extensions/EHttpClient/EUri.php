@@ -174,25 +174,3 @@ abstract class EUri {
 	 */
 	abstract public function valid();
 }
-ted directly.
-     * Use EUri::factory() to return a new EUri object.
-     *
-     * @param string $scheme         The scheme of the URI
-     * @param string $schemeSpecific The scheme-specific part of the URI
-     */
-    abstract protected function __construct($scheme, $schemeSpecific = '');
-
-    /**
-     * Return a string representation of this URI.
-     *
-     * @return string
-     */
-    abstract public function getUri();
-
-    /**
-     * Returns TRUE if this URI is valid, or FALSE otherwise.
-     *
-     * @return boolean
-     */
-    abstract public function valid();
-}
