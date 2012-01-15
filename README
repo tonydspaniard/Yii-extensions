@@ -35,7 +35,9 @@ This repository has the following structure and extensions:
       
       widgets/
       	EDateRangePicker/       http://www.yiiframework.com/extension/edaterangepicker/
+            EProjekktor/            http://www.yiiframework.com/extension/jqprettyphoto/
       	jqPrettyPhoto/          http://www.yiiframework.com/extension/jqprettyphoto/
+
       	
       README               this file
 
