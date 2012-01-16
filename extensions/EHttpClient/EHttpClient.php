@@ -41,7 +41,11 @@
  * @category   Yii
  * @package    EHttpClient
  */
-Yii::import('site.common.components.httpclient.adapter.*');
+$adapters = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'adapter';
+
+Yii::setPathOfAlias('adapters', $adapters);
+
+Yii::import('adapters.*');
 
 class EHttpClient {
 	/**
