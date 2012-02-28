@@ -311,8 +311,7 @@ class EFeed extends CComponent{
 		{
 			$head .= CHtml::openTag('rss',array(
 						"version"=>"2.0",
-						"xmlns:content"=>"http://purl.org/rss/1.0/modules/content/",
-						"xmlns:wfw"=>"http://wellformedweb.org/CommentAPI/")).PHP_EOL;	
+						"xmlns:atom"=>"http://www.w3.org/2005/Atom")).PHP_EOL;	
 		}    
 		elseif($this->type == self::RSS1)
 		{
@@ -379,6 +378,13 @@ class EFeed extends CComponent{
 				echo $this->makeNode($key,'',array('href'=>$value));
 				// And add the id for ATOM
 				echo $this->makeNode('id',$this->uuid($value,'urn:uuid:'));
+			}
+			elseif($key == 'atom:link'){
+				echo CHtml::tag('atom:link', array(
+					'href' => $value,
+					'rel' => 'self',
+					'type' => 'application/rss+xml',
+				));
 			}
 			else
 			{
