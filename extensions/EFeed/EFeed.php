@@ -380,6 +380,11 @@ class EFeed extends CComponent{
 				// And add the id for ATOM
 				echo $this->makeNode('id',$this->uuid($value,'urn:uuid:'));
 			}
+			elseif ($this->type == self::RSS2 && $key == 'atom:link')
+			{
+				echo $this->makeNode($key,'',array('rel'=>'self', 'href'=>$value, 'type'=>'application/rss+xml'));
+				
+			}
 			else
 			{
 				echo $this->makeNode($key, $value);
