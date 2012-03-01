@@ -364,9 +364,9 @@ class EFeed extends CComponent{
 				break;
 		   case self::RSS1: 
 		   		if(null !== $this->RSS1ChannelAbout )
-		   			echo CHtml::tag('channel',array('rdf:about'=>$this->RSS1ChannelAbout ));
+		   			echo CHtml::openTag('channel',array('rdf:about'=>$this->RSS1ChannelAbout )) . PHP_EOL;
 		   		else 
-		   			echo CHtml::tag('channel',array('rdf:about'=>$this->link));
+		   			echo CHtml::openTag('channel',array('rdf:about'=>$this->link)) . PHP_EOL;
 				break;
 		}
 		
@@ -410,6 +410,8 @@ class EFeed extends CComponent{
 				echo CHtml::tag('rdf:li',array('resource'=>$tag->content ),true).PHP_EOL;
 			}
 			echo "</rdf:Seq>" . PHP_EOL . "</items>" . PHP_EOL;
+			
+			echo CHtml::closeTag('channel') . PHP_EOL;
 		}
 	}
 	/**
