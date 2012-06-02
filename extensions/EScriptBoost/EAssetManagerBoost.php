@@ -164,7 +164,7 @@ class EAssetManagerBoost extends CAssetManager {
 					$dstFile, EScriptBoost::minifyJs(@file_get_contents($src), EScriptBoost::JS_MIN_PLUS));
 			@touch($dstFile, @filemtime($src));
 		} 
-		else if ($ext == 'CSS')
+		else if (($ext == 'CSS' && !$this->strpos_arr($dstFile, $this->minifiedExtensionFlags)) || $this->forceCompress )
 		{
 
 			Yii::trace('copyFile CSS Compressing: ' . $src, 'EAssetManagerBoost');
