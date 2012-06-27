@@ -1074,7 +1074,7 @@ class EHttpClient {
 				} else
 				{
 
-					throw new Zend_Http_Client_Exception('Adapter does not support streaming');
+					throw new EHttpClientException(Yii::t('EHttpClient', 'Adapter does not support streaming'));
 				}
 			}
 
