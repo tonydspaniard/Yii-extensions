@@ -1340,7 +1340,7 @@ class EHttpClient {
 									if (is_array($this->paramsPost[$fieldName]))
 									{
 										$flattened = self::_flattenParametersArray($this->paramsPost[$fieldName], $fieldName);
-										foreach ($flatted as $pp)
+										foreach ($flattened as $pp)
 										{
 											$body .= self::encodeFormData($boundary, $pp[0], $pp[1]);
 										}
