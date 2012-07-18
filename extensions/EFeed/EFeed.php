@@ -290,7 +290,7 @@ class EFeed extends CComponent{
 	 * Generates the Feed
 	 */
 	public function generateFeed(){
-		header("Content-type: text/xml");
+		header("Content-type: text/xml; charset=utf-8");
 		$this->renderHead();
 		$this->renderChannels();
 		$this->renderItems();
