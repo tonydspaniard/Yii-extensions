@@ -398,7 +398,7 @@ class EGMap extends EGMapBase {
 	public function appendMapTo($id)
 	{
 		if (substr(ltrim($id), 0, 1) != '#' && $id != 'body')
-			throw new CException(Yii::t('EGMap', 'The id of the layer doesnt seem a correct ID (not CSS selector) <br/>Function: ' . __FUNCTION__));
+			throw new CException(Yii::t('EGMap', 'The id of the layer doesnt seem a correct ID (not CSS selector) <br/>Function: {function}', array('{function}'=>__FUNCTION__)));
 		$this->_appendTo = $id;
 	}
 
