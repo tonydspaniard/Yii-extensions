@@ -108,8 +108,8 @@ class EHttpCookie {
 	 *
 	 * @param string $name
 	 * @param string $value
-	 * @param int $expires
 	 * @param string $domain
+	 * @param int $expires
 	 * @param string $path
 	 * @param bool $secure
 	 */
@@ -291,18 +291,20 @@ class EHttpCookie {
 
 	/**
 	 * Generate a new EHttpCookie object from a cookie string
-	 * (for example the value of the Set-EHttpCookie HTTP header)
+	 * (for example the value of the Set-Cookie HTTP header)
 	 *
 	 * @param string $cookieStr
-	 * @param EUriHttp|string $ref_uri Reference URI for default values (domain, path)
+	 * @param EUriHttp|string $refUri Reference URI for default values (domain, path)
+	 * @param boolean $encodeValue Whether or not the cookie's value should be
+	 *                             passed through urlencode/urldecode
 	 * @return EHttpCookie A new EHttpCookie object or false on failure.
 	 */
-	public static function fromString($cookieStr, $ref_uri = null)
+	public static function fromString($cookieStr, $refUri = null, $encodeValue = true)
 	{
 		// Set default values
-		if (is_string($ref_uri))
+		if (is_string($refUri))
 		{
-			$ref_uri = EUriHttp::factory($ref_uri);
+			$refUri = EUriHttp::factory($refUri);
 		}
 
 		$name = '';
@@ -324,10 +326,10 @@ class EHttpCookie {
 			$value = urldecode(trim($value));
 
 		// Set default domain and path
-		if ($ref_uri instanceof EUriHttp)
+		if ($refUri instanceof EUriHttp)
 		{
-			$domain = $ref_uri->getHost();
-			$path = $ref_uri->getPath();
+			$domain = $refUri->getHost();
+			$path = $refUri->getPath();
 			$path = substr($path, 0, strrpos($path, '/'));
 		}
 
@@ -368,7 +370,7 @@ class EHttpCookie {
 
 		if ($name !== '')
 		{
-			$ret = new EHttpCookie($name, $value, $domain, $expires, $path, $secure);
+			$ret = new self($name, $value, $domain, $expires, $path, $secure);
 			$ret->encodeValue = ($encodeValue) ? true : false;
 			return $ret;
 		} else
