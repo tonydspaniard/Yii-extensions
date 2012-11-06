@@ -65,19 +65,17 @@ class EConditionalValidator extends CValidator {
 	/**
 	 * Validates the attribute of the object.
 	 * If there is any error, the error message is added to the object.
-	 * @param CModel the object being validated
-	 * @param string the attribute being validated
+	 * @param CModel $object the object being validated
+	 * @param string $attribute the attribute being validated
 	 */
 	protected function validateAttribute($object, $attribute)
 	{
-		$obj = get_class($object);
-		$obj = new $obj();
-		$obj->setAttributes($object->getAttributes());
+		$obj = clone $object;
 
 		if (!$this->skipConditional && !$this->validateConditional($obj, $this->conditionalRules))
 			return false;
 
-		$validator = CValidator::createValidator($this->rule[0], $object, $attribute, array_splice($this->rule, 1));
+		$validator = CValidator::createValidator($this->rule[0], $object, $attribute, array_slice($this->rule, 1, null, true));
 		$validator->validate($object);
 		$obj = null;
 	}
