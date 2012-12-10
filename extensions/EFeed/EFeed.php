@@ -312,14 +312,16 @@ class EFeed extends CComponent{
 			$head .= CHtml::openTag('rss',array(
 						"version"=>"2.0",
 						"xmlns:content"=>"http://purl.org/rss/1.0/modules/content/",
-						"xmlns:wfw"=>"http://wellformedweb.org/CommentAPI/")).PHP_EOL;	
+						"xmlns:wfw"=>"http://wellformedweb.org/CommentAPI/",
+						"xmlns:atom"=>"http://www.w3.org/2005/Atom")).PHP_EOL;	
 		}    
 		elseif($this->type == self::RSS1)
 		{
 			$head .= CHtml::openTag('rdf:RDF',array(
 						"xmlns:rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 						"xmlns"=>"http://purl.org/rss/1.0/",
-						"xmlns:dc"=>"http://purl.org/dc/elements/1.1/"
+						"xmlns:dc"=>"http://purl.org/dc/elements/1.1/",
+						"xmlns:atom"=>"http://www.w3.org/2005/Atom"
 					)).PHP_EOL;
 		}
 		else if($this->type == self::ATOM)
