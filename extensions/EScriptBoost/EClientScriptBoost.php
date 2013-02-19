@@ -40,6 +40,6 @@ class EClientScriptBoost extends CClientScript
 			$compressed = EScriptBoost::minifyJs($script);
 			Yii::app()->cache->set($id, $compressed, $this->cacheDuration);
 		}
-		parent::registerScript($id, $compressed, $position);
+		return parent::registerScript($id, $compressed, $position);
 	}
 }
