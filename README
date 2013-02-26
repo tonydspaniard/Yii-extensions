@@ -3,6 +3,14 @@ Yii Framework Extensions
 
 The following is my small contribution for the amazing Yii community.
 
+IMPORTANT NOTICE
+================
+This repository will soon be refactored to a list of sub-modules pointing to isolated extensions / widgets / helpers 
+in order to help you and the libraries to be improved independently. Was a mistake on the first place to create one 
+single and huge repository to publish all my extensions. 
+
+Hope with this change things will be better for all of us to maintain/improve :)
+
 
 EXTENSIONS LIBRARY
 ------------------
