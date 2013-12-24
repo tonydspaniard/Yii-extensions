@@ -27,19 +27,37 @@
  */
 class EClientScriptBoost extends CClientScript
 {
-	public $cacheDuration = 0;
+    public $cacheDuration = 0;
 	
-	public function registerScript($id, $script, $position=self::POS_READY)
-	{
-		// assumed config includes the required path aliases to use
-		// EScriptBoost
-		$compressed = YII_DEBUG ? $script : Yii::app()->cache->get($id);
-		
-		if($compressed === false)
-		{
-			$compressed = EScriptBoost::minifyJs($script);
-			Yii::app()->cache->set($id, $compressed, $this->cacheDuration);
-		}
-		return parent::registerScript($id, $compressed, $position);
-	}
+    private $skipList=array('CButtonColumn');
+
+    public function registerScript($id,$script,$position=null,array $htmlOptions=array())
+    {    
+        // assumed config includes the required path aliases to use
+        // EScriptBoost
+        $debug=YII_DEBUG;
+
+        foreach($this->skipList as $s) {
+            $skip|=strpos($script, $s) === 0;
+            if($skip) break;
+        }
+
+        $compressed = !$debug ? false : Yii::app()->cache->get($id);
+
+        if($skip) { // Skipping scripts that should not be cached.
+            $compressed= EScriptBoost::minifyJs($script);
+        } elseif($debug&&
+                $compressed!==false) {
+            $c = EScriptBoost::minifyJs($script);
+            if($c!==$compressed) {
+                Yii::log("Issue with caching of compressed script '$id'\n".CVarDumper::dumpAsString($c)."\nXXX\n".CVarDumper::dumpAsString($compressed),CLogger::LEVEL_ERROR);
+
+            }
+        } elseif ($compressed === false)
+        {
+            $compressed = EScriptBoost::minifyJs($script);
+            Yii::app()->cache->set($id, $compressed, $this->cacheDuration);
+        }
+        parent::registerScript($id, $compressed, $position, $htmlOptions);
+    }
 }
