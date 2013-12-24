@@ -29,7 +29,7 @@ class EClientScriptBoost extends CClientScript
 {
     public $cacheDuration = 0;
 	
-    private $skipList=array('CButtonColumn');
+    private $skipList=array('CButtonColumn','CJuiDialog');
 
     public function registerScript($id,$script,$position=null,array $htmlOptions=array())
     {    
@@ -38,7 +38,7 @@ class EClientScriptBoost extends CClientScript
         $debug=YII_DEBUG;
 
         foreach($this->skipList as $s) {
-            $skip|=strpos($script, $s) === 0;
+            $skip|=strpos($id, $s) === 0;
             if($skip) break;
         }
 
