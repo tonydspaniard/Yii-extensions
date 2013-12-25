@@ -29,7 +29,7 @@ class EClientScriptBoost extends CClientScript
 {
     public $cacheDuration = 0;
 	
-    private $skipList=array('CButtonColumn','CJuiDialog');
+    private $skipList=array('Yii.CHtml.#yt','CButtonColumn','CJuiDialog','CJuiButton');
 
     public function registerScript($id,$script,$position=null,array $htmlOptions=array())
     {    
