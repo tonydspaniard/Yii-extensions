@@ -28,8 +28,14 @@
 class EClientScriptBoost extends CClientScript
 {
     public $cacheDuration = 0;
-	
-    private $skipList=array('Yii.CHtml.#yt','CButtonColumn','CJuiDialog','CJuiButton');
+    
+    /** Start of Ids for scripts that should not be cached.
+     *  For instance: when the cached script has a CSRF token.
+     *  The solution for application controlled scripts is to add the CSRF Value to the key,
+     *  but for scripts in extensions or the framework, it is not recommended to change the framework
+     *  nor the extension, so they are added in this list.
+     */
+    private $skipList=array('Yii.CHtml.#','CButtonColumn','CJuiDialog','CJuiButton','EditableField#','JToggleColumn#');
 
     public function registerScript($id,$script,$position=null,array $htmlOptions=array())
     {    
@@ -37,6 +43,7 @@ class EClientScriptBoost extends CClientScript
         // EScriptBoost
         $debug=YII_DEBUG;
 
+        // Check if this script is in the exceptions - if so, skip caching.
         foreach($this->skipList as $s) {
             $skip|=strpos($id, $s) === 0;
             if($skip) break;
@@ -48,6 +55,8 @@ class EClientScriptBoost extends CClientScript
             $compressed= EScriptBoost::minifyJs($script);
         } elseif($debug&&
                 $compressed!==false) {
+            // During debug check that the newly minified script is not different from the cached one.
+            // If so, log the difference so that it can be fixed.
             $c = EScriptBoost::minifyJs($script);
             if($c!==$compressed) {
                 Yii::log("Issue with caching of compressed script '$id'\n".CVarDumper::dumpAsString($c)."\nXXX\n".CVarDumper::dumpAsString($compressed),CLogger::LEVEL_ERROR);
