@@ -341,6 +341,12 @@ class EGeoNameService extends CComponent {
 			'root' => 'geonames',
 		),
 	);
+	
+	/**
+	 * Required to be useable as application component
+	 */
+	public function init() {
+	}
 
 	/**
 	 * 
