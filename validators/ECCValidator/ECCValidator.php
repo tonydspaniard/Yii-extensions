@@ -109,13 +109,15 @@ class ECCValidator extends CValidator{
 	 */
 	public function validateDate($creditCardExpiredMonth, $creditCardExpiredYear){
 		
-		$currentYear = intval(date('Y'));
+		$currentYear  = intval(date('Y'));
+		$currentMonth = intval(date('m'));
 		
 		if(is_scalar($creditCardExpiredMonth)) $creditCardExpiredMonth = intval($creditCardExpiredMonth);
 		if(is_scalar($creditCardExpiredYear)) $creditCardExpiredYear = intval($creditCardExpiredYear);
 		
-		return 	is_integer($creditCardExpiredMonth) && $creditCardExpiredMonth >= 1 && $creditCardExpiredMonth <= 12 && 
-				is_integer( $creditCardExpiredYear ) && $creditCardExpiredYear > $currentYear && $creditCardExpiredYear < $currentYear+10;
+		return is_integer($creditCardExpiredMonth) && is_integer($creditCardExpiredYear) && $creditCardExpiredMonth <= 12
+        && ($creditCardExpiredMonth >= 1  && $creditCardExpiredYear > $currentYear
+        && $creditCardExpiredYear < $currentYear + 10) || ($creditCardExpiredYear == $currentYear && $creditCardExpiredMonth >= $currentMonth);
 	}
 	/**
 	 * 
