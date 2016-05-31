@@ -112,10 +112,20 @@ class EConditionalValidator extends CValidator {
 
 			$validator = CValidator::createValidator($conditionalValidator, $object, $attributes, $parameters);
 
+			# Backup and clear original errors
+			$errors = $object->getErrors();
+			$object->clearErrors();
+
+			# Execute conditionalValidator
 			$validator->validate($object);
-			if ($object->hasErrors())
+			$invalid = $object->hasErrors();
+
+			# Restore original errors
+			$object->clearErrors();
+			$object->addErrors($errors);
+
+			if ($invalid)
 			{
-				$object->clearErrors();
 				return false;
 			}
 		}
